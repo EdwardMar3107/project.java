@@ -1,6 +1,9 @@
 package models;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PrimitiveIterator;
 
 public class Order {
 
@@ -8,8 +11,9 @@ public class Order {
     private Long userId;
     private LocalDate date;
     private String status;
+    private List<Product> products;
 
-    public Order (Long userId, LocalDate date, String status) {
+    public Order (Long userId, LocalDate date, String status, List<Product> products) {
         this.userId = userId;
         this.date = date;
         this.status = status;
@@ -31,6 +35,10 @@ public class Order {
         return status;
     }
 
+    public List<Product> getProducts() {
+        return products;
+    }
+
     public void setUserId(Long userId) {
         this.userId = userId;
     }
@@ -43,6 +51,10 @@ public class Order {
         this.status = status;
     }
 
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -51,5 +63,9 @@ public class Order {
                 ", date=" + date +
                 ", status='" + status + '\'' +
                 '}';
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

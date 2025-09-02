@@ -1,24 +1,42 @@
 package repositories;
 import models.Product;
 
-import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import utils.DatabaseConnection;
-
-import javax.xml.crypto.Data;
+import exceptions.DatabaseException;
 
 public class ProductRepository {
 
-    public List<Product> findAll() {
-        List<Product> products = new ArrayList<>();
-        final String sql = "SELECT * FROM products";
+    private static final String FIND_ALL_SQL = "SELECT * FROM products";
+    private static final String FIND_BY_ID_SQL = "SELECT * FROM products WHERE id = ?";
+    private static final String CREATE_SQL = "INSERT INTO products (name, price, is_available, created_at) VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_SQL = "UPDATE products SET name = ?, price = ?, is_available = ?, created_at = ? WHERE id = ?";
+    private static final String DELETE_SQL = "DELETE FROM products WHERE id = ?";
 
-        try (Connection conn = DatabaseConnection.getConnection();
+    private final DatabaseConnection databaseConnection;
+
+    public ProductRepository(DatabaseConnection databaseConnection) {
+        this.databaseConnection = databaseConnection;
+    }
+
+    private void setProductParameters(PreparedStatement stmt, Product product, boolean includeId) throws SQLException {
+        stmt.setString(1, product.getName());
+        stmt.setBigDecimal(2, product.getPrice());
+        stmt.setBoolean(3, product.getAvailable());
+        stmt.setDate(4, Date.valueOf(product.getCreatedAt()));
+        if (includeId) {
+            stmt.setLong(5, product.getId());
+        }
+    }
+
+    public List<Product> findAll() throws DatabaseException {
+        List<Product> products = new ArrayList<>();
+
+        try (Connection conn = databaseConnection.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(FIND_ALL_SQL)) {
 
             while (rs.next()) {
                 Product product = new Product(
@@ -27,80 +45,82 @@ public class ProductRepository {
                         rs.getBoolean("is_available"),
                         rs.getDate("created_at").toLocalDate()
                 );
+                product.setId(rs.getLong("id"));
                 products.add(product);
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка в findAll: " + e.getMessage());
+            throw new DatabaseException("Ошибка при выполнении findAll: " + e.getMessage(), e);
         }
         return products;
     }
 
-    public Product findById(Long id) {
-        final String sql = "SELECT * FROM products WHERE id = ?";
+    public Product findById(Long id) throws DatabaseException {
         Product product = null;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
 
             stmt.setLong(1, id);
-            if (rs.next()) {
-                product = new Product(
-                        rs.getString("name"),
-                        rs.getBigDecimal("price"),
-                        rs.getBoolean("is_available"),
-                        rs.getDate("created_at").toLocalDate()
-                );
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    product = new Product(
+                            rs.getString("name"),
+                            rs.getBigDecimal("price"),
+                            rs.getBoolean("isAvailable"),
+                            rs.getDate("createdAt").toLocalDate()
+                    );
+                    product.setId(rs.getLong("id"));
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Ошибка в findById: " + e.getMessage());
+            throw new DatabaseException("Ошибка при выполнении findById: " + e.getMessage(), e);
         }
         return product;
     }
 
-    public void create(Product product) {
-        final String sql = "INSERT INTO products (name, price, is_available, created_at) VALUES (?, ?, ?, ?)";
+    public void create(Product product) throws DatabaseException {
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, product.getName());
-            stmt.setBigDecimal(2, product.getPrice());
-            stmt.setBoolean(3, product.getAvailable());
-            stmt.setDate(4, java.sql.Date.valueOf(product.getCreatedAt()));
+            setProductParameters(stmt, product, false);
             stmt.executeUpdate();
 
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    product.setId(generatedKeys.getLong(1));
+                    System.out.println("Сгенерированный ID: " + product.getId());
+                }
+            }
+
         } catch (SQLException e) {
-            System.out.println("Ошибка в create: " + e.getMessage());
+            throw new DatabaseException("Ошибка при выполнении create: " + e.getMessage(), e);
         }
     }
 
-    public void update(Product product) {
-        final String sql = "UPDATE products SET name = ?, price = ?, is_available = ?, created_at = ? WHERE id = ?";
+    public void update(Product product) throws DatabaseException {
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
 
-            stmt.setString(1, product.getName());
-            stmt.setBigDecimal(2, product.getPrice());
-            stmt.setBoolean(3, product.getAvailable());
-            stmt.setDate(4, java.sql.Date.valueOf(product.getCreatedAt()));
-            stmt.setLong(5, product.getId());
+            setProductParameters(stmt, product, true);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
-            System.out.println("Ошибка в update: " + e.getMessage());
+            throw new DatabaseException("Ошибка при выполнении update: " + e.getMessage(), e);
         }
     }
 
-    public void delete(Long id) {
-        final String sql = "DELETE FROM products WHERE id = ?";
+    public void delete(Long id) throws DatabaseException {
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
+
             stmt.setLong(1, id);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
-            System.out.println("Ошибка в delete: " + e.getMessage());
+            throw new DatabaseException("Ошибка при выполнении delete: " + e.getMessage(), e);
         }
     }
 }

@@ -11,9 +11,5 @@ import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException {
-        ProductRepository productRepo = new ProductRepository();
-        UserRepository userRepo = new UserRepository();
-        OrderRepository orderRepo = new OrderRepository();
-
     }
 }
