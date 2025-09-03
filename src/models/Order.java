@@ -17,6 +17,7 @@ public class Order {
         this.userId = userId;
         this.date = date;
         this.status = status;
+        this.products = products != null ? new ArrayList<>(products) : new ArrayList<>();
     }
 
     public Long getId() {
