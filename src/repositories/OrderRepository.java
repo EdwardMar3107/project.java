@@ -136,7 +136,7 @@ public class OrderRepository {
 
     public void delete (Long id) throws DatabaseException {
 
-        try (Connection conn = databaseConnection.getConnection() {
+        try (Connection conn = databaseConnection.getConnection()) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement mapStmt = conn.prepareStatement(DELETE_MAP_SQL);
