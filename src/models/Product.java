@@ -10,6 +10,7 @@ public class Product {
     private BigDecimal price;
     private Boolean isAvailable;
     private LocalDate createdAt;
+    private int quantity;
 
     public Product (String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
         this.name = name;
@@ -37,6 +38,8 @@ public class Product {
     public LocalDate getCreatedAt() {
         return createdAt;
     }
+
+    public int getQuantity() { return quantity; }
 
     public void setName(String name) {
         this.name = name;

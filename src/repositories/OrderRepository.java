@@ -11,34 +11,8 @@ import utils.DatabaseConnection;
 import exceptions.DatabaseException;
 
 public class OrderRepository {
-
-    private static final String FIND_ALL_SQL = "SELECT * FROM orders";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM orders WHERE id = ?";
-    private static final String CREATE_ORDER_SQL = "INSERT INTO orders (user_id, date, status) VALUES (?, ?, ?)";
-    private static final String UPDATE_ORDER_SQL = "UPDATE orders SET user_id = ?, date = ?, status = ? WHERE id = ?";
-    private static final String DELETE_ORDER_SQL = "DELETE FROM orders WHERE id = ?";
-    private static final String CREATE_MAP_SQL = "INSERT INTO orders_goods_map (order_id, product_id, quantity) VALUES (?, ?, ?)";
-    private static final String DELETE_MAP_SQL = "DELETE FROM orders_goods_map WHERE order_id = ?";
-
-    private final DatabaseConnection databaseConnection;
-
     public OrderRepository(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
-    }
-
-    private void setOrderParameters(PreparedStatement stmt, Order order, boolean includeId) throws SQLException {
-        stmt.setLong(1, order.getUserId());
-        stmt.setTimestamp(2, Timestamp.valueOf(order.getDate().atStartOfDay()));
-        stmt.setString(3, order.getStatus());
-        if (includeId) {
-            stmt.setLong(4, order.getId());
-        }
-    }
-
-    private void setMapParameters(PreparedStatement stmt, Long orderId, Product product, int quantity) throws SQLException {
-        stmt.setLong(1, orderId);
-        stmt.setLong(2, product.getId());
-        stmt.setInt(3, quantity);
     }
 
     public List<Order> findAll() throws DatabaseException {
@@ -49,13 +23,9 @@ public class OrderRepository {
              ResultSet rs = stmt.executeQuery(FIND_ALL_SQL)) {
 
             while (rs.next()) {
-                Order order = new Order(
-                rs.getLong("userId"),
-                LocalDate.from(rs.getTimestamp("date").toLocalDateTime()),
-                rs.getString("status")
-                );
-                order.setId(rs.getLong("id"));
-                orders.add(order);
+
+                orders.add(mapResultSetToOrder(rs));
+
             }
         } catch (SQLException e) {
             throw new DatabaseException("Ошибка при выполнении findAll: " + e.getMessage(), e);
@@ -72,12 +42,9 @@ public class OrderRepository {
             stmt.setLong(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    order = new Order(
-                    rs.getLong("userId"),
-                    LocalDate.from(rs.getTimestamp("date").toLocalDateTime()),
-                    rs.getString("status")
-                    );
-                    order.setId(rs.getLong("id"));
+
+                    order = mapResultSetToOrder(rs);
+
                 }
             }
         } catch (SQLException e) {
@@ -98,14 +65,15 @@ public class OrderRepository {
                 try (ResultSet generatedKeys = orderStmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         order.setId(generatedKeys.getLong(1));
-                        System.out.println("Сгенерированный ID: " + order.getId());
                     }
                 }
 
                 if (order.getProducts() != null) {
                     try (PreparedStatement mapStmt = conn.prepareStatement(CREATE_MAP_SQL)) {
                         for (Product product : order.getProducts()) {
-                            setMapParameters(mapStmt, order.getId(), product, 1); // Количество по умолчанию 1
+                            mapStmt.setLong(1, order.getId());
+                            mapStmt.setLong(2, product.getId());
+                            mapStmt.setInt(3, product.getQuantity() != 0 ? product.getQuantity() : 1);
                             mapStmt.addBatch();
                         }
                         mapStmt.executeBatch();
@@ -155,5 +123,34 @@ public class OrderRepository {
         } catch (SQLException e) {
             throw new DatabaseException("Ошибка при управлении транзакцией: " + e.getMessage(), e);
         }
+    }
+
+    private static final String FIND_ALL_SQL = "SELECT * FROM orders";
+    private static final String FIND_BY_ID_SQL = "SELECT * FROM orders WHERE id = ?";
+    private static final String CREATE_ORDER_SQL = "INSERT INTO orders (user_id, date, status) VALUES (?, ?, ?)";
+    private static final String UPDATE_ORDER_SQL = "UPDATE orders SET user_id = ?, date = ?, status = ? WHERE id = ?";
+    private static final String DELETE_ORDER_SQL = "DELETE FROM orders WHERE id = ?";
+    private static final String CREATE_MAP_SQL = "INSERT INTO orders_goods_map (order_id, product_id, quantity) VALUES (?, ?, ?)";
+    private static final String DELETE_MAP_SQL = "DELETE FROM orders_goods_map WHERE order_id = ?";
+
+    private final DatabaseConnection databaseConnection;
+
+    private void setOrderParameters(PreparedStatement stmt, Order order, boolean includeId) throws SQLException {
+        stmt.setLong(1, order.getUserId());
+        stmt.setTimestamp(2, Timestamp.valueOf(order.getDate().atStartOfDay()));
+        stmt.setString(3, order.getStatus());
+        if (includeId) {
+            stmt.setLong(4, order.getId());
+        }
+    }
+
+    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+        Order order = new Order(
+                rs.getLong("userId"),
+                LocalDate.from(rs.getTimestamp("date").toLocalDateTime()),
+                rs.getString("status")
+        );
+        order.setId(rs.getLong("id"));
+        return order;
     }
 }

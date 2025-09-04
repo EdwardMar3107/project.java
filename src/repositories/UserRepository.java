@@ -10,29 +10,9 @@ import exceptions.DatabaseException;
 
 public class UserRepository {
 
-    private static final String FIND_ALL_SQL = "SELECT * FROM users";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM users WHERE id = ?";
-    private static final String CREATE_SQL = "INSERT INTO users (name, surname, login, password, birth_date) VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE users SET name = ?, surname = ?, login = ?, password = ?, birth_date = ? WHERE id = ?";
-    private static final String DELETE_SQL = "DELETE FROM users WHERE id = ?";
-
-    private final DatabaseConnection databaseConnection;
-
     public UserRepository(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
     }
-
-    private void setUserParameters (PreparedStatement stmt, User user, boolean includeId) throws SQLException {
-        stmt.setString(1, user.getName());
-        stmt.setString(2, user.getSurname());
-        stmt.setString(3, user.getLogin());
-        stmt.setString(4, user.getPassword());
-        stmt.setDate(5, Date.valueOf(user.getBirthDate()));
-        if (includeId) {
-            stmt.setLong(6, user.getId());
-        }
-    }
-
 
     public List<User> findAll() throws DatabaseException {
         List<User> users = new ArrayList<>();
@@ -42,15 +22,9 @@ public class UserRepository {
              ResultSet rs = stmt.executeQuery(FIND_ALL_SQL)) {
 
             while (rs.next()) {
-                User user = new User (
-                        rs.getString("name"),
-                        rs.getString("surname"),
-                        rs.getString("login"),
-                        rs.getString("password"),
-                        rs.getDate("birth_date").toLocalDate()
-                );
-                user.setId(rs.getLong("id"));
-                users.add(user);
+
+                users.add(mapResultSetToUser(rs));
+
             }
         } catch (SQLException e) {
             throw new DatabaseException("Ошибка при выполнении findAll: " + e.getMessage(), e);
@@ -69,14 +43,9 @@ public class UserRepository {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    user = new User (
-                            rs.getString("name"),
-                            rs.getString("surname"),
-                            rs.getString("login"),
-                            rs.getString("password"),
-                            rs.getDate("birth_date").toLocalDate()
-                    );
-                    user.setId(rs.getLong("id"));
+
+                    user = mapResultSetToUser(rs);
+
                 }
             }
         } catch (SQLException e) {
@@ -96,14 +65,12 @@ public class UserRepository {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     user.setId(generatedKeys.getLong(1));
-                    System.out.println("Сгенерированный ID: " + user.getId());
                 }
             }
 
         } catch (SQLException e) {
             throw new DatabaseException("Ошибка при выполнении create: " + e.getMessage(), e);
         }
-
     }
 
     public void update (User user) throws DatabaseException {
@@ -117,7 +84,6 @@ public class UserRepository {
         } catch (SQLException e) {
             throw new DatabaseException("Ошибка при выполнении update: " + e.getMessage(), e);
         }
-
     }
 
     public void delete(Long id) throws DatabaseException {
@@ -131,5 +97,36 @@ public class UserRepository {
         } catch (SQLException e) {
             throw new DatabaseException("Ошибка при выполнении delete: " + e.getMessage(), e);
         }
+    }
+
+    private static final String FIND_ALL_SQL = "SELECT * FROM users";
+    private static final String FIND_BY_ID_SQL = "SELECT * FROM users WHERE id = ?";
+    private static final String CREATE_SQL = "INSERT INTO users (name, surname, login, password, birth_date) VALUES (?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL = "UPDATE users SET name = ?, surname = ?, login = ?, password = ?, birth_date = ? WHERE id = ?";
+    private static final String DELETE_SQL = "DELETE FROM users WHERE id = ?";
+
+    private final DatabaseConnection databaseConnection;
+
+    private void setUserParameters (PreparedStatement stmt, User user, boolean includeId) throws SQLException {
+        stmt.setString(1, user.getName());
+        stmt.setString(2, user.getSurname());
+        stmt.setString(3, user.getLogin());
+        stmt.setString(4, user.getPassword());
+        stmt.setDate(5, Date.valueOf(user.getBirthDate()));
+        if (includeId) {
+            stmt.setLong(6, user.getId());
+        }
+    }
+
+    private User mapResultSetToUser (ResultSet rs) throws SQLException {
+        User user = new User (
+                rs.getString("name"),
+                rs.getString("surname"),
+                rs.getString("login"),
+                rs.getString("password"),
+                rs.getDate("birth_date").toLocalDate()
+        );
+        user.setId(rs.getLong("id"));
+        return user;
     }
 }
