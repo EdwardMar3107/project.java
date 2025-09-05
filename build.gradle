@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.myproject'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.hibernate:hibernate-core:6.4.2.Final'
+    implementation 'org.postgresql:postgresql:42.7.7'
+}
+
+java {
+    sourceCompatibility = 24
+    targetCompatibility = 24
+}
