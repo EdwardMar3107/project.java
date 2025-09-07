@@ -11,6 +11,16 @@ import utils.DatabaseConnection;
 import exceptions.DatabaseException;
 
 public class OrderRepository {
+
+    private static final String FIND_ALL_SQL = "SELECT * FROM orders";
+    private static final String FIND_BY_ID_SQL = "SELECT * FROM orders WHERE id = ?";
+    private static final String CREATE_ORDER_SQL = "INSERT INTO orders (user_id, date, status) VALUES (?, ?, ?)";
+    private static final String UPDATE_ORDER_SQL = "UPDATE orders SET user_id = ?, date = ?, status = ? WHERE id = ?";
+    private static final String DELETE_ORDER_SQL = "DELETE FROM orders WHERE id = ?";
+    private static final String CREATE_MAP_SQL = "INSERT INTO orders_goods_map (order_id, product_id, quantity) VALUES (?, ?, ?)";
+    private static final String DELETE_MAP_SQL = "DELETE FROM orders_goods_map WHERE order_id = ?";
+
+    private final DatabaseConnection databaseConnection;
     public OrderRepository(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
     }
@@ -124,16 +134,6 @@ public class OrderRepository {
             throw new DatabaseException("Ошибка при управлении транзакцией: " + e.getMessage(), e);
         }
     }
-
-    private static final String FIND_ALL_SQL = "SELECT * FROM orders";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM orders WHERE id = ?";
-    private static final String CREATE_ORDER_SQL = "INSERT INTO orders (user_id, date, status) VALUES (?, ?, ?)";
-    private static final String UPDATE_ORDER_SQL = "UPDATE orders SET user_id = ?, date = ?, status = ? WHERE id = ?";
-    private static final String DELETE_ORDER_SQL = "DELETE FROM orders WHERE id = ?";
-    private static final String CREATE_MAP_SQL = "INSERT INTO orders_goods_map (order_id, product_id, quantity) VALUES (?, ?, ?)";
-    private static final String DELETE_MAP_SQL = "DELETE FROM orders_goods_map WHERE order_id = ?";
-
-    private final DatabaseConnection databaseConnection;
 
     private void setOrderParameters(PreparedStatement stmt, Order order, boolean includeId) throws SQLException {
         stmt.setLong(1, order.getUserId());
