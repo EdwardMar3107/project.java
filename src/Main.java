@@ -1,4 +1,5 @@
 import exceptions.DatabaseException;
+import models.Order;
 import models.Product;
 import models.User;
 import repositories.OrderRepository;
@@ -13,19 +14,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Main {
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) throws ClassNotFoundException, DatabaseException {
 
         DatabaseConnection databaseConnection = new DatabaseConnection();
 
-        UserRepository userRepository = new UserRepository(databaseConnection);
+        OrderRepository orderRepository = new OrderRepository(databaseConnection);
 
-        try {
-            User newUser = new User("Eduard", "Kirov", "edwardmar", "edik200331", LocalDate.of(2002,7,31));
+        ProductRepository productRepository = new ProductRepository(databaseConnection);
 
-            userRepository.create(newUser);
+        Order byId = orderRepository.findById(1L);
 
-        } catch (DatabaseException e) {
-            throw new RuntimeException(e);
-        }
+        System.out.println(byId);
     }
 }

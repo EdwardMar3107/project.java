@@ -63,6 +63,7 @@ public class Order {
                 ", userId=" + userId +
                 ", date=" + date +
                 ", status='" + status + '\'' +
+                ", products=" + products +
                 '}';
     }
 
