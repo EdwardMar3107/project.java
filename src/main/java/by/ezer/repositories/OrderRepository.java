@@ -1,4 +1,4 @@
-package repositories;
+package by.ezer.repositories;
 import models.Order;
 
 import java.sql.*;

@@ -1,4 +1,4 @@
-package models;
+package by.ezer.models;
 
 import java.time.LocalDate;
 

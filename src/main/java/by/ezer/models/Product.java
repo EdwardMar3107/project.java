@@ -1,7 +1,8 @@
-package models;
+package by.ezer.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
 
 public class Product {
 

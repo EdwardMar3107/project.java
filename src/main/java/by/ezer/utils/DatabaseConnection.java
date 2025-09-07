@@ -1,4 +1,4 @@
-package utils;
+package by.ezer.utils;
 
 import exceptions.DatabaseException;
 

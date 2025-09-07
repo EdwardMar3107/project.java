@@ -1,9 +1,10 @@
-package models;
+package by.ezer.models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PrimitiveIterator;
+import jakarta.persistence.Entity;
 
 public class Order {
 
