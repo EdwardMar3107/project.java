@@ -41,6 +41,10 @@ public class Order {
         return products;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public void setUserId(Long userId) {
         this.userId = userId;
     }
@@ -66,9 +70,5 @@ public class Order {
                 ", status='" + status + '\'' +
                 ", products=" + products +
                 '}';
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 }

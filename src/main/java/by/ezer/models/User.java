@@ -80,7 +80,7 @@ public class User {
                 ", surname='" + surname + '\'' +
                 ", login='" + login + '\'' +
                 ", password='" + password + '\'' +
-                ", birthDate=" + birthDate +
+                ", birth_date=" + birthDate +
                 '}';
     }
 }

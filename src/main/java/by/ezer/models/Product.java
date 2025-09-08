@@ -38,6 +38,10 @@ public class Product {
         return createdAt;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -63,9 +67,5 @@ public class Product {
                 ", isAvailable=" + isAvailable +
                 ", createdAt=" + createdAt +
                 '}';
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 }
