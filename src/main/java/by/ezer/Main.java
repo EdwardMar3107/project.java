@@ -45,23 +45,23 @@ public class Main {
                 orderRepository.create(order);
                 System.out.println("Создан заказ #" + order.getId() + " для пользователя " + user.getName());
 
-                System.out.println("\nВсе пользователи:");
+                System.out.println("Все пользователи:");
                 userRepository.findAll().forEach(u ->
                         System.out.println(u.getId() + ": " + u.getName() + " " + u.getSurname())
                 );
 
-                System.out.println("\nВсе продукты:");
+                System.out.println("Все продукты:");
                 productRepository.findAll().forEach(p ->
                         System.out.println(p.getId() + ": " + p.getName() + " - " + p.getPrice() + " (доступен: " + p.getIsAvailable() + ")")
                 );
 
-                System.out.println("\nВсе заказы:");
+                System.out.println("Все заказы:");
                 orderRepository.findAll().forEach(o ->
                         System.out.println(o.getId() + ": пользователь " + o.getUser().getName() + ", статус: " + o.getStatus())
                 );
 
                 User foundUser = userRepository.findById(user.getId());
-                System.out.println("\nНайден пользователь по ID: " + foundUser.getName());
+                System.out.println("Найден пользователь по ID: " + foundUser.getName());
 
                 product1.setPrice(new BigDecimal("1099.99"));
                 productRepository.update(product1);
