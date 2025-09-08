@@ -4,6 +4,10 @@ import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.Order;
 import by.ezer.models.Product;
 import by.ezer.utils.DatabaseConnection;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -12,199 +16,54 @@ import java.util.List;
 
 
 public class OrderRepository {
-    public OrderRepository(DatabaseConnection databaseConnection) {
-        this.databaseConnection = databaseConnection;
+
+    private final Session session;
+
+    public OrderRepository(Session session) {
+        this.session = session;
     }
-
-    private List<Product> getMapped() throws DatabaseException {
-        List<Product> products = new ArrayList<>();
-
-        try (Connection conn = databaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("select * from products p inner join orders_products_map opm on p.id = opm.product_id")) {
-
-            while (rs.next()) {
-
-                Product p = new Product(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getBigDecimal("price"),
-                        rs.getBoolean("is_available"),
-                        rs.getDate("created_at").toLocalDate());
-
-                products.add(p);
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
-        }
-        return products;
-    }
-
-    private List<Product> getMappedById(Long id) throws DatabaseException {
-        List<Product> products = new ArrayList<>();
-
-        try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("select * from products p inner join orders_products_map opm on p.id = opm.product_id where opm.order_id = ?")) {
-
-            stmt.setLong(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-
-                    Product p = new Product(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getBigDecimal("price"),
-                            rs.getBoolean("is_available"),
-                            rs.getDate("created_at").toLocalDate());
-
-                    products.add(p);
-                }
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e.getMessage(), e);
-        }
-        return products;
-    }
-
 
     public List<Order> findAll() throws DatabaseException {
-        List<Order> orders = new ArrayList<>();
-        List<Product> products = getMapped();
-
-        try (Connection conn = databaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(FIND_ALL_SQL)) {
-
-            while (rs.next()) {
-
-                orders.add(mapResultSetToOrder(rs, products));
-
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении findAll: " + e.getMessage(), e);
+        try {
+            Query<Order> query = session.createQuery("FROM Order", Order.class);
+            return query.list();
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при получении всех заказов: " + e.getMessage(), e);
         }
-        return orders;
     }
 
     public Order findById(Long id) throws DatabaseException {
-        Order order = null;
-
-        try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
-
-            stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-
-                    order = mapResultSetToOrder(rs, getMappedById(id));
-
-                }
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении findById: " + e.getMessage(), e);
+        try {
+            return session.find(Order.class, id);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при поиске заказа с ID " + id + ": " + e.getMessage(), e);
         }
-        return order;
     }
 
     public void create(Order order) throws DatabaseException {
-        try (Connection conn = databaseConnection.getConnection()) {
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement orderStmt = conn.prepareStatement(CREATE_ORDER_SQL, Statement.RETURN_GENERATED_KEYS)) {
-                setOrderParameters(orderStmt, order, false);
-
-                orderStmt.executeUpdate();
-
-                try (ResultSet generatedKeys = orderStmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        order.setId(generatedKeys.getLong(1));
-                    }
-                }
-
-                if (order.getProducts() != null) {
-                    try (PreparedStatement mapStmt = conn.prepareStatement(CREATE_MAP_SQL)) {
-                        for (Product product : order.getProducts()) {
-                            mapStmt.setLong(1, order.getId());
-                            mapStmt.setLong(2, product.getId());
-                            mapStmt.addBatch();
-                        }
-                        mapStmt.executeBatch();
-                    }
-                }
-
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw new DatabaseException("Ошибка при выполнении create: " + e.getMessage(), e);
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при управлении транзакцией: " + e.getMessage(), e);
+        try {
+            session.persist(order);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при создании заказа: " + e.getMessage(), e);
         }
     }
 
     public void update(Order order) throws DatabaseException {
-        try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(UPDATE_ORDER_SQL)) {
-
-            setOrderParameters(stmt, order, true);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении update: " + e.getMessage(), e);
+        try {
+            session.merge(order);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при обновлении заказа: " + e.getMessage(), e);
         }
     }
 
     public void delete(Long id) throws DatabaseException {
-
-        try (Connection conn = databaseConnection.getConnection()) {
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement mapStmt = conn.prepareStatement(DELETE_MAP_SQL);
-                 PreparedStatement orderStmt = conn.prepareStatement(DELETE_ORDER_SQL)) {
-
-                mapStmt.setLong(1, id);
-                mapStmt.executeUpdate();
-
-                orderStmt.setLong(1, id);
-
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw new DatabaseException("Ошибка при выполнении delete: " + e.getMessage(), e);
+        try {
+            Order order = session.find(Order.class, id);
+            if (order != null) {
+                session.remove(order);
             }
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при управлении транзакцией: " + e.getMessage(), e);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при удалении заказа: " + e.getMessage(), e);
         }
-    }
-
-    private static final String FIND_ALL_SQL = "SELECT * FROM orders";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM orders WHERE id = ?";
-    private static final String CREATE_ORDER_SQL = "INSERT INTO orders (user_id, date, status) VALUES (?, ?, ?)";
-    private static final String UPDATE_ORDER_SQL = "UPDATE orders SET user_id = ?, date = ?, status = ? WHERE id = ?";
-    private static final String DELETE_ORDER_SQL = "DELETE FROM orders WHERE id = ?";
-    private static final String CREATE_MAP_SQL = "INSERT INTO orders_goods_map (order_id, product_id, quantity) VALUES (?, ?, ?)";
-    private static final String DELETE_MAP_SQL = "DELETE FROM orders_goods_map WHERE order_id = ?";
-
-    private final DatabaseConnection databaseConnection;
-
-    private void setOrderParameters(PreparedStatement stmt, Order order, boolean includeId) throws SQLException {
-        stmt.setLong(1, order.getUserId());
-        stmt.setTimestamp(2, Timestamp.valueOf(order.getDate().atStartOfDay()));
-        stmt.setString(3, order.getStatus());
-        if (includeId) {
-            stmt.setLong(4, order.getId());
-        }
-    }
-
-    private Order mapResultSetToOrder(ResultSet rs, List<Product> products) throws SQLException {
-        Order order = new Order(
-                rs.getLong("user_id"),
-                LocalDate.from(rs.getTimestamp("date").toLocalDateTime()),
-                rs.getString("status"),
-                products
-        );
-        order.setId(rs.getLong("id"));
-        return order;
     }
 }

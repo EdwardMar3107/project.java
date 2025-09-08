@@ -5,6 +5,10 @@ package by.ezer.repositories;
 import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.User;
 import by.ezer.utils.DatabaseConnection;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,124 +16,52 @@ import java.util.List;
 
 
 public class UserRepository {
-
-    public UserRepository(DatabaseConnection databaseConnection) {
-        this.databaseConnection = databaseConnection;
+    private final Session session;
+    public UserRepository(Session session) {
+        this.session = session;
     }
 
     public List<User> findAll() throws DatabaseException {
-        List<User> users = new ArrayList<>();
-
-        try (Connection conn = databaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(FIND_ALL_SQL)) {
-
-            while (rs.next()) {
-
-                users.add(mapResultSetToUser(rs));
-
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении findAll: " + e.getMessage(), e);
+        try {
+            Query<User> query = session.createQuery("FROM User", User.class);
+            return query.list();
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при получении всех пользователей: " + e.getMessage(), e);
         }
-         return users;
     }
-
 
     public User findById(Long id) throws DatabaseException {
-        User user = null;
-
-        try (Connection conn = databaseConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
-
-            stmt.setLong(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-
-                    user = mapResultSetToUser(rs);
-
-                }
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении findById: " + e.getMessage(), e);
-        }
-        return user;
-    }
-
-    public void create (User user) throws DatabaseException {
-
-        try (Connection conn = databaseConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(CREATE_SQL)) {
-
-            setUserParameters(stmt, user, false);
-            stmt.executeUpdate();
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    user.setId(generatedKeys.getLong(1));
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении create: " + e.getMessage(), e);
+        try {
+            return session.find(User.class, id);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при поиске пользователя с ID " + id + ": " + e.getMessage(), e);
         }
     }
 
-    public void update (User user) throws DatabaseException {
+    public void create(User user) throws DatabaseException {
+        try {
+            session.persist(user);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при создании пользователя: " + e.getMessage(), e);
+        }
+    }
 
-        try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
-
-            setUserParameters(stmt, user, true);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении update: " + e.getMessage(), e);
+    public void update(User user) throws DatabaseException {
+        try {
+            session.merge(user);
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при обновлении пользователя: " + e.getMessage(), e);
         }
     }
 
     public void delete(Long id) throws DatabaseException {
-
-        try (Connection conn = databaseConnection.getConnection();
-        PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
-
-            stmt.setLong(1, id);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Ошибка при выполнении delete: " + e.getMessage(), e);
+        try {
+            User user = session.find(User.class, id);
+            if (user != null) {
+                session.remove(user);
+            }
+        } catch (HibernateException e) {
+            throw new DatabaseException("Ошибка при удалении пользователя: " + e.getMessage(), e);
         }
-    }
-
-    private static final String FIND_ALL_SQL = "SELECT * FROM users";
-    private static final String FIND_BY_ID_SQL = "SELECT * FROM users WHERE id = ?";
-    private static final String CREATE_SQL = "INSERT INTO users (name, surname, login, password, birth_date) VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_SQL = "UPDATE users SET name = ?, surname = ?, login = ?, password = ?, birth_date = ? WHERE id = ?";
-    private static final String DELETE_SQL = "DELETE FROM users WHERE id = ?";
-
-    private final DatabaseConnection databaseConnection;
-
-    private void setUserParameters (PreparedStatement stmt, User user, boolean includeId) throws SQLException {
-        stmt.setString(1, user.getName());
-        stmt.setString(2, user.getSurname());
-        stmt.setString(3, user.getLogin());
-        stmt.setString(4, user.getPassword());
-        stmt.setDate(5, Date.valueOf(user.getBirthDate()));
-        if (includeId) {
-            stmt.setLong(6, user.getId());
-        }
-    }
-
-    private User mapResultSetToUser (ResultSet rs) throws SQLException {
-        User user = new User (
-                rs.getString("name"),
-                rs.getString("surname"),
-                rs.getString("login"),
-                rs.getString("password"),
-                rs.getDate("birth_date").toLocalDate()
-        );
-        user.setId(rs.getLong("id"));
-        return user;
     }
 }

@@ -1,71 +1,40 @@
 package by.ezer.models;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-
+@Entity
+@Table (name = "products")
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class Product {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column (name = "id")
     private Long id;
+
+    @Column (name = "name")
     private String name;
+
+    @Column (name = "price")
     private BigDecimal price;
+
+    @Column (name = "is_available")
     private Boolean isAvailable;
+
+    @Column (name = "created_at")
     private LocalDate createdAt;
-    public Product (Long id, String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
+
+    public Product (String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
         this.name = name;
         this.price = price;
         this.isAvailable = isAvailable;
         this.createdAt = createdAt;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public Boolean getAvailable() {
-        return isAvailable;
-    }
-
-    public LocalDate getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public void setAvailable(Boolean available) {
-        isAvailable = available;
-    }
-
-    public void setCreatedAt(LocalDate createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", isAvailable=" + isAvailable +
-                ", createdAt=" + createdAt +
-                '}';
     }
 }

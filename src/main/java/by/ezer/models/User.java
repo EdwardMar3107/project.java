@@ -1,20 +1,42 @@
 package by.ezer.models;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
 public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
+
+    @Column (name = "name", nullable = false)
     private String name;
+
+    @Column (name = "surname", nullable = false)
     private String surname;
+
+    @Column (name = "login", nullable = false, unique = true)
     private String login;
+
+    @Column (name = "password", nullable = false)
     private String password;
+
+    @Column (name = "birth_date")
     private LocalDate birthDate;
 
-
-    public User() {
-
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 
     public User(String name, String surname, String login, String password, LocalDate birthDate) {
         this.name = name;
@@ -22,65 +44,5 @@ public class User {
         this.login = login;
         this.password = password;
         this.birthDate = birthDate;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", birth_date=" + birthDate +
-                '}';
     }
 }
