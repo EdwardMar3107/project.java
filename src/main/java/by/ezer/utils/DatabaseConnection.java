@@ -1,6 +1,6 @@
 package by.ezer.utils;
 
-import exceptions.DatabaseException;
+import by.ezer.exceptions.DatabaseException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

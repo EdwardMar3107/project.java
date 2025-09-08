@@ -1,10 +1,4 @@
-import exceptions.DatabaseException;
-import models.Product;
-import models.User;
-import repositories.OrderRepository;
-import repositories.ProductRepository;
-import repositories.UserRepository;
-import utils.DatabaseConnection;
+package by.ezer;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException {

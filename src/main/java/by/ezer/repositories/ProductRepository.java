@@ -1,11 +1,14 @@
 package by.ezer.repositories;
-import models.Product;
+
+
+import by.ezer.exceptions.DatabaseException;
+import by.ezer.models.Product;
+import by.ezer.utils.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import utils.DatabaseConnection;
-import exceptions.DatabaseException;
+
 
 public class ProductRepository {
     public ProductRepository(DatabaseConnection databaseConnection) {
@@ -116,8 +119,8 @@ public class ProductRepository {
         Product product = new Product(
                 rs.getString("name"),
                 rs.getBigDecimal("price"),
-                rs.getBoolean("isAvailable"),
-                rs.getDate("createdAt").toLocalDate()
+                rs.getBoolean("is_available"),
+                rs.getDate("created_at").toLocalDate()
         );
         product.setId(rs.getLong("id"));
         return product;

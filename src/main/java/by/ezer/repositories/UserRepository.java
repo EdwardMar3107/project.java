@@ -1,12 +1,15 @@
 package by.ezer.repositories;
 
-import models.User;
+
+
+import by.ezer.exceptions.DatabaseException;
+import by.ezer.models.User;
+import by.ezer.utils.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import utils.DatabaseConnection;
-import exceptions.DatabaseException;
+
 
 public class UserRepository {
 

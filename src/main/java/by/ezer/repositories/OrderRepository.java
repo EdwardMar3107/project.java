@@ -1,14 +1,15 @@
 package by.ezer.repositories;
-import models.Order;
+
+import by.ezer.exceptions.DatabaseException;
+import by.ezer.models.Order;
+import by.ezer.models.Product;
+import by.ezer.utils.DatabaseConnection;
 
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.Product;
-import utils.DatabaseConnection;
-import exceptions.DatabaseException;
 
 public class OrderRepository {
     public OrderRepository(DatabaseConnection databaseConnection) {
@@ -73,7 +74,6 @@ public class OrderRepository {
                         for (Product product : order.getProducts()) {
                             mapStmt.setLong(1, order.getId());
                             mapStmt.setLong(2, product.getId());
-                            mapStmt.setInt(3, product.getQuantity() != 0 ? product.getQuantity() : 1);
                             mapStmt.addBatch();
                         }
                         mapStmt.executeBatch();
