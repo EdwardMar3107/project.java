@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PrimitiveIterator;
-import jakarta.persistence.Entity;
+
 
 public class Order {
 
@@ -64,6 +64,7 @@ public class Order {
                 ", userId=" + userId +
                 ", date=" + date +
                 ", status='" + status + '\'' +
+                ", products=" + products +
                 '}';
     }
 

@@ -16,8 +16,61 @@ public class OrderRepository {
         this.databaseConnection = databaseConnection;
     }
 
+    private List<Product> getMapped() throws DatabaseException {
+        List<Product> products = new ArrayList<>();
+
+        try (Connection conn = databaseConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("select * from products p inner join orders_products_map opm on p.id = opm.product_id")) {
+
+            while (rs.next()) {
+
+                Product p = new Product(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getBigDecimal("price"),
+                        rs.getBoolean("is_available"),
+                        rs.getDate("created_at").toLocalDate());
+
+                products.add(p);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage(), e);
+        }
+        return products;
+    }
+
+    private List<Product> getMappedById(Long id) throws DatabaseException {
+        List<Product> products = new ArrayList<>();
+
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("select * from products p inner join orders_products_map opm on p.id = opm.product_id where opm.order_id = ?")) {
+
+            stmt.setLong(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+
+                    Product p = new Product(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getBigDecimal("price"),
+                            rs.getBoolean("is_available"),
+                            rs.getDate("created_at").toLocalDate());
+
+                    products.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage(), e);
+        }
+        return products;
+    }
+
+
     public List<Order> findAll() throws DatabaseException {
         List<Order> orders = new ArrayList<>();
+        List<Product> products = getMapped();
 
         try (Connection conn = databaseConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -25,7 +78,7 @@ public class OrderRepository {
 
             while (rs.next()) {
 
-                orders.add(mapResultSetToOrder(rs));
+                orders.add(mapResultSetToOrder(rs, products));
 
             }
         } catch (SQLException e) {
@@ -44,7 +97,7 @@ public class OrderRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
 
-                    order = mapResultSetToOrder(rs);
+                    order = mapResultSetToOrder(rs, getMappedById(id));
 
                 }
             }
@@ -102,13 +155,13 @@ public class OrderRepository {
         }
     }
 
-    public void delete (Long id) throws DatabaseException {
+    public void delete(Long id) throws DatabaseException {
 
         try (Connection conn = databaseConnection.getConnection()) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement mapStmt = conn.prepareStatement(DELETE_MAP_SQL);
-            PreparedStatement orderStmt = conn.prepareStatement(DELETE_ORDER_SQL)) {
+                 PreparedStatement orderStmt = conn.prepareStatement(DELETE_ORDER_SQL)) {
 
                 mapStmt.setLong(1, id);
                 mapStmt.executeUpdate();
@@ -144,11 +197,12 @@ public class OrderRepository {
         }
     }
 
-    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+    private Order mapResultSetToOrder(ResultSet rs, List<Product> products) throws SQLException {
         Order order = new Order(
-                rs.getLong("userId"),
+                rs.getLong("user_id"),
                 LocalDate.from(rs.getTimestamp("date").toLocalDateTime()),
-                rs.getString("status")
+                rs.getString("status"),
+                products
         );
         order.setId(rs.getLong("id"));
         return order;

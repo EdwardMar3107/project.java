@@ -117,7 +117,7 @@ public class ProductRepository {
 
     private Product mapResultSetToProduct (ResultSet rs) throws  SQLException {
         Product product = new Product(
-                rs.getString("name"),
+                rs.getLong("id"), rs.getString("name"),
                 rs.getBigDecimal("price"),
                 rs.getBoolean("is_available"),
                 rs.getDate("created_at").toLocalDate()
