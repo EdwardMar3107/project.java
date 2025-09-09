@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table (name = "products")
@@ -30,6 +32,9 @@ public class Product {
 
     @Column (name = "created_at")
     private LocalDate createdAt;
+
+    @ManyToMany(mappedBy = "products")
+    private List<Order> orders = new ArrayList<>();
 
     public Product (String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
         this.name = name;
