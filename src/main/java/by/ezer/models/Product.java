@@ -42,4 +42,10 @@ public class Product {
         this.isAvailable = isAvailable;
         this.createdAt = createdAt;
     }
+
+    public void addOrder(Order order) {
+        if (order == null) throw new IllegalArgumentException("Order cannot be null");
+        this.orders.add(order);
+        order.addProduct(this);
+    }
 }

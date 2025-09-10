@@ -36,13 +36,17 @@ public class Order {
     )
     private List<Product> products = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();
-
     public Order (User user, LocalDate date, String status, List<Product> products) {
         this.user = user;
         this.date = date;
         this.status = status;
         this.products = products != null ? new ArrayList<>(products) : new ArrayList<>();
+
+    }
+
+    public void addProduct(Product product) {
+        if (product == null) throw new IllegalArgumentException("Product cannot be null");
+        this.products.add(product);
+        product.addOrder(this);
     }
 }

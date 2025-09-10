@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ProductRepository {
 
-    private Session session;
+    private final Session session;
 
     public ProductRepository(Session session) {
         this.session = session;
