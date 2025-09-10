@@ -9,6 +9,7 @@ import by.ezer.models.User;
 import by.ezer.repositories.OrderRepository;
 import by.ezer.repositories.ProductRepository;
 import by.ezer.repositories.UserRepository;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class OrderService {
         }
         User user = userRepository.findById(orderCreateDTO.getUserId());
         if (user == null) {
-            throw new DatabaseException("Order with id " + orderCreateDTO.getUserId() + " not found");
+            throw new DatabaseException("User with id " + orderCreateDTO.getUserId() + " not found");
         }
 
         List<Product> products = orderCreateDTO.getProductIds().stream()
