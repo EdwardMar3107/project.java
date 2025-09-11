@@ -6,7 +6,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table (name = "products")
@@ -34,18 +36,12 @@ public class Product {
     private LocalDate createdAt;
 
     @ManyToMany(mappedBy = "products")
-    private List<Order> orders = new ArrayList<>();
+    private Set<Order> orders = new HashSet<>();
 
     public Product (String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
         this.name = name;
         this.price = price;
         this.isAvailable = isAvailable;
         this.createdAt = createdAt;
-    }
-
-    public void addOrder(Order order) {
-        if (order == null) throw new IllegalArgumentException("Order cannot be null");
-        this.orders.add(order);
-        order.addProduct(this);
     }
 }

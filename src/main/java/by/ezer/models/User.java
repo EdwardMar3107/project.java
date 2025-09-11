@@ -45,10 +45,4 @@ public class User {
         this.password = password;
         this.birthDate = birthDate;
     }
-
-    public void addOrder(Order order) {
-        if (order == null) throw new IllegalArgumentException("Order cannot be null");
-        this.orders.add(order);
-        order.setUser(this);
-    }
 }

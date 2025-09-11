@@ -5,7 +5,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "orders")
@@ -20,7 +22,7 @@ public class Order {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -34,19 +36,13 @@ public class Order {
     @JoinTable(name = "orders_products_map", joinColumns = @JoinColumn(name = "order_id"),
     inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<Product> products = new ArrayList<>();
+    private Set<Product> products = new HashSet<>();
 
-    public Order (User user, LocalDate date, String status, List<Product> products) {
+    public Order (User user, LocalDate date, String status, Set<Product> products) {
         this.user = user;
         this.date = date;
         this.status = status;
-        this.products = products != null ? new ArrayList<>(products) : new ArrayList<>();
+        this.products = products != null ? new HashSet<>(products) : new HashSet<>();
 
-    }
-
-    public void addProduct(Product product) {
-        if (product == null) throw new IllegalArgumentException("Product cannot be null");
-        this.products.add(product);
-        product.addOrder(this);
     }
 }

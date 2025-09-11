@@ -1,59 +1,58 @@
-package by.ezer.repositories;
-
-
+package by.ezer.repositories.impl;
 
 import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.User;
-import by.ezer.utils.DatabaseConnection;
+import by.ezer.repositories.api.UserRepository;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
-
-public class UserRepository {
+public class UserRepositoryImpl implements UserRepository {
     private final Session session;
-    public UserRepository(Session session) {
+    public UserRepositoryImpl(Session session) {
         this.session = session;
     }
 
+    @Override
     public List<User> findAll() throws DatabaseException {
         try {
             Query<User> query = session.createQuery("FROM User", User.class);
             return query.list();
         } catch (HibernateException e) {
-            throw new DatabaseException("Ошибка при получении всех пользователей: " + e.getMessage(), e);
+            throw new DatabaseException(e);
         }
     }
 
+    @Override
     public User findById(Long id) throws DatabaseException {
         try {
             return session.find(User.class, id);
         } catch (HibernateException e) {
-            throw new DatabaseException("Ошибка при поиске пользователя с ID " + id + ": " + e.getMessage(), e);
+            throw new DatabaseException(e);
         }
     }
 
+    @Override
     public void create(User user) throws DatabaseException {
         try {
             session.persist(user);
         } catch (HibernateException e) {
-            throw new DatabaseException("Ошибка при создании пользователя: " + e.getMessage(), e);
+            throw new DatabaseException(e);
         }
     }
 
+    @Override
     public void update(User user) throws DatabaseException {
         try {
             session.merge(user);
         } catch (HibernateException e) {
-            throw new DatabaseException("Ошибка при обновлении пользователя: " + e.getMessage(), e);
+            throw new DatabaseException(e);
         }
     }
 
+    @Override
     public void delete(Long id) throws DatabaseException {
         try {
             User user = session.find(User.class, id);
@@ -61,7 +60,7 @@ public class UserRepository {
                 session.remove(user);
             }
         } catch (HibernateException e) {
-            throw new DatabaseException("Ошибка при удалении пользователя: " + e.getMessage(), e);
+            throw new DatabaseException(e);
         }
     }
 }

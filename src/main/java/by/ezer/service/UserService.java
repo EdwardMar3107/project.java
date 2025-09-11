@@ -1,10 +1,10 @@
 package by.ezer.service;
 
-import by.ezer.dto.UserCreateDTO;
-import by.ezer.dto.UserDTO;
+import by.ezer.dto.userDTO.UserCreateDTO;
+import by.ezer.dto.userDTO.UserDTO;
 import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.User;
-import by.ezer.repositories.UserRepository;
+import by.ezer.repositories.api.UserRepository;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     public UserService(Session session) {
-        this.userRepository = new UserRepository(session);
+        this.userRepository = new by.ezer.repositories.impl.UserRepositoryImpl(session);
     }
 
     public UserDTO createUser(UserCreateDTO userCreateDTO) throws DatabaseException {

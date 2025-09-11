@@ -1,10 +1,10 @@
 package by.ezer.service;
 
-import by.ezer.dto.ProductCreateDTO;
-import by.ezer.dto.ProductDTO;
+import by.ezer.dto.productDTO.ProductCreateDTO;
+import by.ezer.dto.productDTO.ProductDTO;
 import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.Product;
-import by.ezer.repositories.ProductRepository;
+import by.ezer.repositories.api.ProductRepository;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     public ProductService(Session session) {
-        this.productRepository = new  ProductRepository(session);
+        this.productRepository = new  by.ezer.repositories.impl.ProductRepositoryImpl(session);
     }
 
     public ProductDTO createProduct(ProductCreateDTO productCreateDTO) throws DatabaseException {

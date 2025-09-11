@@ -1,4 +1,4 @@
-package by.ezer.dto;
+package by.ezer.dto.userDTO;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

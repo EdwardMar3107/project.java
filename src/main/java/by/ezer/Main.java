@@ -4,14 +4,12 @@ import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.Order;
 import by.ezer.models.Product;
 import by.ezer.models.User;
-import by.ezer.repositories.OrderRepository;
-import by.ezer.repositories.ProductRepository;
-import by.ezer.repositories.UserRepository;
+import by.ezer.repositories.impl.OrderRepositoryImpl;
+import by.ezer.repositories.impl.ProductRepositoryImpl;
+import by.ezer.repositories.impl.UserRepositoryImpl;
 import by.ezer.utils.HibernateUtil;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,9 +21,9 @@ public class Main {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            UserRepository userRepository = new UserRepository(session);
-            ProductRepository productRepository = new ProductRepository(session);
-            OrderRepository orderRepository = new OrderRepository(session);
+            UserRepositoryImpl userRepository = new UserRepositoryImpl(session);
+            ProductRepositoryImpl productRepository = new ProductRepositoryImpl(session);
+            OrderRepositoryImpl orderRepository = new OrderRepositoryImpl(session);
 
             try {
                 User user = new User("Иван", "Иванов", "ivanov", "password123", LocalDate.of(1990, 5, 15));
@@ -41,7 +39,7 @@ public class Main {
                 productRepository.create(product3);
                 System.out.println("Созданы продукты: " + product1.getName() + ", " + product2.getName() + ", " + product3.getName());
 
-                Order order = new Order(user, LocalDate.now(), "новый", Arrays.asList(product1, product2));
+                Order order = new Order(user, LocalDate.now(), "новый", (java.util.Set<Product>) Arrays.asList(product1, product2));
                 orderRepository.create(order);
                 System.out.println("Создан заказ #" + order.getId() + " для пользователя " + user.getName());
 

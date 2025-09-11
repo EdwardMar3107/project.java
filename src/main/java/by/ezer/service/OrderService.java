@@ -1,19 +1,19 @@
 package by.ezer.service;
 
-import by.ezer.dto.OrderCreateDTO;
-import by.ezer.dto.OrderDTO;
+import by.ezer.dto.orderDTO.OrderCreateDTO;
+import by.ezer.dto.orderDTO.OrderDTO;
 import by.ezer.exceptions.DatabaseException;
 import by.ezer.models.Order;
 import by.ezer.models.Product;
 import by.ezer.models.User;
-import by.ezer.repositories.OrderRepository;
-import by.ezer.repositories.ProductRepository;
-import by.ezer.repositories.UserRepository;
-import org.hibernate.HibernateException;
+import by.ezer.repositories.api.OrderRepository;
+import by.ezer.repositories.api.ProductRepository;
+import by.ezer.repositories.api.UserRepository;
 import org.hibernate.Session;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OrderService {
@@ -22,9 +22,9 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     public OrderService(Session session) {
-        this.orderRepository = new OrderRepository(session);
-        this.userRepository = new UserRepository(session);
-        this.productRepository = new ProductRepository(session);
+        this.orderRepository = new by.ezer.repositories.impl.OrderRepositoryImpl(session);
+        this.userRepository = new by.ezer.repositories.impl.UserRepositoryImpl(session);
+        this.productRepository = new by.ezer.repositories.impl.ProductRepositoryImpl(session);
     }
 
     public OrderDTO createOrder(OrderCreateDTO orderCreateDTO) throws DatabaseException {
@@ -55,8 +55,7 @@ public class OrderService {
         if (products.isEmpty() && !orderCreateDTO.getProductIds().isEmpty()) {
             throw new DatabaseException("One or more orders not found");
         }
-        Order order = new Order(user, orderCreateDTO.getDate(), orderCreateDTO.getStatus(), products);
-        products.forEach(order::addProduct);
+        Order order = new Order(user, orderCreateDTO.getDate(), orderCreateDTO.getStatus(), (Set<Product>) products);
         orderRepository.create(order);
         return new OrderDTO(order.getId(),
                 order.getUser().getId(),
@@ -116,7 +115,6 @@ public class OrderService {
                     .filter(Objects::nonNull)
                     .toList();
             existingOrder.getProducts().clear();
-            newProducts.forEach(existingOrder::addProduct);
         }
         orderRepository.update(existingOrder);
     }
