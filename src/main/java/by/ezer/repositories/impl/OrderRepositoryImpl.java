@@ -1,6 +1,7 @@
 package by.ezer.repositories.impl;
 
 import by.ezer.exceptions.DatabaseException;
+import by.ezer.exceptions.RepositoryException;
 import by.ezer.models.Order;
 import by.ezer.repositories.api.OrderRepository;
 import org.hibernate.HibernateException;
@@ -19,51 +20,51 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<Order> findAll() throws DatabaseException {
+    public List<Order> findAll() throws RepositoryException {
         try {
             Query<Order> query = session.createQuery("FROM Order", Order.class);
             return query.list();
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public Order findById(Long id) throws DatabaseException {
+    public Order findById(Long id) throws RepositoryException {
         try {
             return session.find(Order.class, id);
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public void create(Order order) throws DatabaseException {
+    public void create(Order order) throws RepositoryException {
         try {
             session.persist(order);
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public void update(Order order) throws DatabaseException {
+    public void update(Order order) throws RepositoryException {
         try {
             session.merge(order);
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public void delete(Long id) throws DatabaseException {
+    public void delete(Long id) throws RepositoryException {
         try {
             Order order = session.find(Order.class, id);
             if (order != null) {
                 session.remove(order);
             }
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 }

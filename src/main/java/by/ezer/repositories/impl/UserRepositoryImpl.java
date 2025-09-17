@@ -1,6 +1,7 @@
 package by.ezer.repositories.impl;
 
 import by.ezer.exceptions.DatabaseException;
+import by.ezer.exceptions.RepositoryException;
 import by.ezer.models.User;
 import by.ezer.repositories.api.UserRepository;
 import org.hibernate.HibernateException;
@@ -16,51 +17,51 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findAll() throws DatabaseException {
+    public List<User> findAll() throws RepositoryException {
         try {
             Query<User> query = session.createQuery("FROM User", User.class);
             return query.list();
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public User findById(Long id) throws DatabaseException {
+    public User findById(Long id) throws RepositoryException {
         try {
             return session.find(User.class, id);
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public void create(User user) throws DatabaseException {
+    public void create(User user) throws RepositoryException {
         try {
             session.persist(user);
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public void update(User user) throws DatabaseException {
+    public void update(User user) throws RepositoryException {
         try {
             session.merge(user);
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 
     @Override
-    public void delete(Long id) throws DatabaseException {
+    public void delete(Long id) throws RepositoryException {
         try {
             User user = session.find(User.class, id);
             if (user != null) {
                 session.remove(user);
             }
         } catch (HibernateException e) {
-            throw new DatabaseException(e);
+            throw new RepositoryException(e);
         }
     }
 }
