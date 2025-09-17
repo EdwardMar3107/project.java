@@ -3,6 +3,7 @@ package by.ezer.service;
 import by.ezer.dto.productDTO.ProductCreateDTO;
 import by.ezer.dto.productDTO.ProductDTO;
 import by.ezer.exceptions.DatabaseException;
+import by.ezer.exceptions.RepositoryException;
 import by.ezer.models.Product;
 import by.ezer.repositories.api.ProductRepository;
 import org.hibernate.Session;
@@ -16,9 +17,9 @@ public class ProductService {
         this.productRepository = new  by.ezer.repositories.impl.ProductRepositoryImpl(session);
     }
 
-    public ProductDTO createProduct(ProductCreateDTO productCreateDTO) throws DatabaseException {
+    public ProductDTO createProduct(ProductCreateDTO productCreateDTO) throws RepositoryException {
         if (productCreateDTO == null) {
-            throw new DatabaseException("ProductCreateDTO cannot be null");
+            throw new RepositoryException("ProductCreateDTO cannot be null");
         }
         Product product = new Product(
                 productCreateDTO.getName(),
@@ -30,28 +31,28 @@ public class ProductService {
         return new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getIsAvailable(), product.getCreatedAt());
     }
 
-    public ProductDTO getProductById(Long id) throws DatabaseException {
+    public ProductDTO getProductById(Long id) throws RepositoryException {
         Product product = productRepository.findById(id);
         if (product == null) {
-            throw new DatabaseException("Product with id " + id + " not found");
+            throw new RepositoryException("Product with id " + id + " not found");
         }
         return new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getIsAvailable(), product.getCreatedAt());
     }
 
-    public List<ProductDTO> getAllProducts() throws DatabaseException {
+    public List<ProductDTO> getAllProducts() throws RepositoryException {
         List<Product> products = productRepository.findAll();
         return products.stream()
                 .map(product -> new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getIsAvailable(), product.getCreatedAt()))
                 .collect(Collectors.toList());
     }
 
-    public void updateProduct(ProductDTO productDTO) throws DatabaseException {
+    public void updateProduct(ProductDTO productDTO) throws RepositoryException {
         if (productDTO == null || productDTO.getId() == null) {
-            throw new DatabaseException("ProductDTO or ID cannot be null");
+            throw new RepositoryException("ProductDTO or ID cannot be null");
         }
         Product existingProduct = productRepository.findById(productDTO.getId());
         if (existingProduct == null) {
-            throw new DatabaseException("Product with ID " + productDTO.getId() + " not found");
+            throw new RepositoryException("Product with ID " + productDTO.getId() + " not found");
         }
         existingProduct.setName(productDTO.getName());
         existingProduct.setPrice(productDTO.getPrice());
@@ -60,7 +61,7 @@ public class ProductService {
         productRepository.update(existingProduct);
     }
 
-    public void deleteProduct(Long id) throws DatabaseException {
+    public void deleteProduct(Long id) throws RepositoryException {
         productRepository.delete(id);
     }
 }
