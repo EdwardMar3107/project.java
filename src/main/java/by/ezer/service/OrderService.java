@@ -3,6 +3,7 @@ package by.ezer.service;
 import by.ezer.dto.orderDTO.OrderCreateDTO;
 import by.ezer.dto.orderDTO.OrderDTO;
 import by.ezer.exceptions.DatabaseException;
+import by.ezer.exceptions.RepositoryException;
 import by.ezer.models.Order;
 import by.ezer.models.Product;
 import by.ezer.models.User;
@@ -27,33 +28,33 @@ public class OrderService {
         this.productRepository = new by.ezer.repositories.impl.ProductRepositoryImpl(session);
     }
 
-    public OrderDTO createOrder(OrderCreateDTO orderCreateDTO) throws DatabaseException {
+    public OrderDTO createOrder(OrderCreateDTO orderCreateDTO) throws RepositoryException {
         if (orderCreateDTO == null) {
-            throw new DatabaseException("OrderCreateDTO cannot be null");
+            throw new RepositoryException("OrderCreateDTO cannot be null");
         }
         if (orderCreateDTO.getDate() == null) {
-            throw new DatabaseException("Order date cannot be null");
+            throw new RepositoryException("Order date cannot be null");
         }
         if (orderCreateDTO.getStatus() == null) {
-            throw new DatabaseException("Order status cannot be null");
+            throw new RepositoryException("Order status cannot be null");
         }
         User user = userRepository.findById(orderCreateDTO.getUserId());
         if (user == null) {
-            throw new DatabaseException("User with id " + orderCreateDTO.getUserId() + " not found");
+            throw new RepositoryException("User with id " + orderCreateDTO.getUserId() + " not found");
         }
 
         List<Product> products = orderCreateDTO.getProductIds().stream()
                 .map(productId -> {
                     try {
                         return productRepository.findById(productId);
-                    } catch (DatabaseException e) {
+                    } catch (RepositoryException e) {
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
                 .toList();
         if (products.isEmpty() && !orderCreateDTO.getProductIds().isEmpty()) {
-            throw new DatabaseException("One or more orders not found");
+            throw new RepositoryException("One or more orders not found");
         }
         Order order = new Order(user, orderCreateDTO.getDate(), orderCreateDTO.getStatus(), (Set<Product>) products);
         orderRepository.create(order);
@@ -65,10 +66,10 @@ public class OrderService {
         );
     }
 
-    public OrderDTO getOrderById(Long id) throws DatabaseException {
+    public OrderDTO getOrderById(Long id) throws RepositoryException {
         Order order = orderRepository.findById(id);
         if (order == null) {
-            throw new DatabaseException("Order with id " + id + " not found");
+            throw new RepositoryException("Order with id " + id + " not found");
         }
         return new OrderDTO(order.getId(),
                 order.getUser().getId(),
@@ -77,7 +78,7 @@ public class OrderService {
                 order.getProducts().stream().map(Product::getId).collect(Collectors.toList()));
     }
 
-    public List<OrderDTO> getAllOrders() throws DatabaseException {
+    public List<OrderDTO> getAllOrders() throws RepositoryException {
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
                 .map(order -> new OrderDTO(order.getId(),
@@ -88,17 +89,17 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public void updateOrder(OrderDTO orderDTO) throws DatabaseException {
+    public void updateOrder(OrderDTO orderDTO) throws RepositoryException {
         if (orderDTO == null || orderDTO.getId() == null) {
-            throw new DatabaseException("OrderDTO or ID cannot be null");
+            throw new RepositoryException("OrderDTO or ID cannot be null");
         }
         Order existingOrder = orderRepository.findById(orderDTO.getId());
         if (existingOrder == null) {
-            throw new DatabaseException("Order with ID " + orderDTO.getId() + " not found");
+            throw new RepositoryException("Order with ID " + orderDTO.getId() + " not found");
         }
         User user = userRepository.findById(orderDTO.getUserId());
         if (user == null) {
-            throw new DatabaseException("User with id " + orderDTO.getUserId() + " not found");
+            throw new RepositoryException("User with id " + orderDTO.getUserId() + " not found");
         }
         existingOrder.setUser(user);
         existingOrder.setDate(orderDTO.getDate());
@@ -108,7 +109,7 @@ public class OrderService {
                     .map(productId -> {
                         try {
                             return productRepository.findById(productId);
-                        } catch (DatabaseException e) {
+                        } catch (RepositoryException e) {
                             return null;
                         }
                     })
@@ -119,7 +120,7 @@ public class OrderService {
         orderRepository.update(existingOrder);
     }
 
-    public void deleteOrder(Long id) throws DatabaseException {
+    public void deleteOrder(Long id) throws RepositoryException {
         orderRepository.delete(id);
     }
 }
