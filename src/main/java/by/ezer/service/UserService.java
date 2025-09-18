@@ -2,8 +2,8 @@ package by.ezer.service;
 
 import by.ezer.dto.userDTO.UserCreateDTO;
 import by.ezer.dto.userDTO.UserDTO;
-import by.ezer.exceptions.DatabaseException;
 import by.ezer.exceptions.RepositoryException;
+import by.ezer.mappers.UserMapper;
 import by.ezer.models.User;
 import by.ezer.repositories.api.UserRepository;
 import org.hibernate.Session;
@@ -21,15 +21,11 @@ public class UserService {
         if (userCreateDTO == null) {
             throw new RepositoryException("UserCreateDTO cannot be null");
         }
-        User user = new User(
-                userCreateDTO.getName(),
-                userCreateDTO.getSurname(),
-                userCreateDTO.getLogin(),
-                userCreateDTO.getPassword(),
-                userCreateDTO.getBirthDate()
-        );
+
+        User user = UserMapper.INSTANCE.toEntity(userCreateDTO);
+
         userRepository.create(user);
-        return new UserDTO(user.getId(), user.getName(), user.getSurname(), user.getBirthDate());
+        return UserMapper.INSTANCE.toDTO(user);
     }
 
     public UserDTO getUserById(Long id) throws RepositoryException {
@@ -37,13 +33,13 @@ public class UserService {
         if (user == null) {
             throw new RepositoryException("User with id " + id + " not found");
         }
-        return new UserDTO(user.getId(), user.getName(), user.getSurname(), user.getBirthDate());
+        return UserMapper.INSTANCE.toDTO(user);
     }
 
     public List<UserDTO> getAllUsers() throws RepositoryException {
         List<User> users = userRepository.findAll();
         return users.stream()
-                .map(user -> new UserDTO(user.getId(), user.getName(), user.getSurname(), user.getBirthDate()))
+                .map(UserMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -55,9 +51,9 @@ public class UserService {
         if (existingUser == null) {
             throw new RepositoryException("User with ID " + userDTO.getId() + " not found");
         }
-        existingUser.setName(userDTO.getName());
-        existingUser.setSurname(userDTO.getSurname());
-        existingUser.setBirthDate(userDTO.getBirthDate());
+
+        UserMapper.INSTANCE.updateUserFromDTO(userDTO, existingUser);
+
         userRepository.update(existingUser);
     }
 

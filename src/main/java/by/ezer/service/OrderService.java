@@ -2,8 +2,8 @@ package by.ezer.service;
 
 import by.ezer.dto.orderDTO.OrderCreateDTO;
 import by.ezer.dto.orderDTO.OrderDTO;
-import by.ezer.exceptions.DatabaseException;
 import by.ezer.exceptions.RepositoryException;
+import by.ezer.mappers.OrderMapper;
 import by.ezer.models.Order;
 import by.ezer.models.Product;
 import by.ezer.models.User;
@@ -12,9 +12,9 @@ import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
 import org.hibernate.Session;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OrderService {
@@ -56,14 +56,13 @@ public class OrderService {
         if (products.isEmpty() && !orderCreateDTO.getProductIds().isEmpty()) {
             throw new RepositoryException("One or more orders not found");
         }
-        Order order = new Order(user, orderCreateDTO.getDate(), orderCreateDTO.getStatus(), (Set<Product>) products);
+
+        Order order = OrderMapper.INSTANCE.toEntity(orderCreateDTO);
+        order.setUser(user);
+        order.setProducts(new HashSet<>(products));
+
         orderRepository.create(order);
-        return new OrderDTO(order.getId(),
-                order.getUser().getId(),
-                order.getDate(),
-                order.getStatus(),
-                order.getProducts().stream().map(Product::getId).collect(Collectors.toList())
-        );
+        return OrderMapper.INSTANCE.toDTO(order);
     }
 
     public OrderDTO getOrderById(Long id) throws RepositoryException {
@@ -71,21 +70,13 @@ public class OrderService {
         if (order == null) {
             throw new RepositoryException("Order with id " + id + " not found");
         }
-        return new OrderDTO(order.getId(),
-                order.getUser().getId(),
-                order.getDate(),
-                order.getStatus(),
-                order.getProducts().stream().map(Product::getId).collect(Collectors.toList()));
+        return OrderMapper.INSTANCE.toDTO(order);
     }
 
     public List<OrderDTO> getAllOrders() throws RepositoryException {
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
-                .map(order -> new OrderDTO(order.getId(),
-                        order.getUser().getId(),
-                        order.getDate(),
-                        order.getStatus(),
-                        order.getProducts().stream().map(Product::getId).collect(Collectors.toList())))
+                .map(OrderMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -101,9 +92,10 @@ public class OrderService {
         if (user == null) {
             throw new RepositoryException("User with id " + orderDTO.getUserId() + " not found");
         }
+
+        OrderMapper.INSTANCE.updateOrderFromDTO(orderDTO, existingOrder); // Обновляем поля
         existingOrder.setUser(user);
-        existingOrder.setDate(orderDTO.getDate());
-        existingOrder.setStatus(orderDTO.getStatus());
+
         if (orderDTO.getProductIds() != null) {
             List<Product> newProducts = orderDTO.getProductIds().stream()
                     .map(productId -> {

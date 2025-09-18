@@ -2,8 +2,8 @@ package by.ezer.service;
 
 import by.ezer.dto.productDTO.ProductCreateDTO;
 import by.ezer.dto.productDTO.ProductDTO;
-import by.ezer.exceptions.DatabaseException;
 import by.ezer.exceptions.RepositoryException;
+import by.ezer.mappers.ProductMapper;
 import by.ezer.models.Product;
 import by.ezer.repositories.api.ProductRepository;
 import org.hibernate.Session;
@@ -21,14 +21,14 @@ public class ProductService {
         if (productCreateDTO == null) {
             throw new RepositoryException("ProductCreateDTO cannot be null");
         }
-        Product product = new Product(
-                productCreateDTO.getName(),
-                productCreateDTO.getPrice(),
-                productCreateDTO.getIsAvailable(),
-                productCreateDTO.getCreatedAt()
-        );
+        if (productCreateDTO.getName() == null || productCreateDTO.getPrice() == null) {
+            throw new RepositoryException("Name and price are required");
+        }
+
+        Product product = ProductMapper.INSTANCE.toEntity(productCreateDTO);
+
         productRepository.create(product);
-        return new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getIsAvailable(), product.getCreatedAt());
+        return ProductMapper.INSTANCE.toDTO(product);
     }
 
     public ProductDTO getProductById(Long id) throws RepositoryException {
@@ -36,13 +36,13 @@ public class ProductService {
         if (product == null) {
             throw new RepositoryException("Product with id " + id + " not found");
         }
-        return new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getIsAvailable(), product.getCreatedAt());
+        return ProductMapper.INSTANCE.toDTO(product);
     }
 
     public List<ProductDTO> getAllProducts() throws RepositoryException {
         List<Product> products = productRepository.findAll();
         return products.stream()
-                .map(product -> new ProductDTO(product.getId(), product.getName(), product.getPrice(), product.getIsAvailable(), product.getCreatedAt()))
+                .map(ProductMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -54,10 +54,9 @@ public class ProductService {
         if (existingProduct == null) {
             throw new RepositoryException("Product with ID " + productDTO.getId() + " not found");
         }
-        existingProduct.setName(productDTO.getName());
-        existingProduct.setPrice(productDTO.getPrice());
-        existingProduct.setIsAvailable(productDTO.getIsAvailable());
-        existingProduct.setCreatedAt(productDTO.getCreatedAt());
+
+        ProductMapper.INSTANCE.updateProductFromDTO(productDTO, existingProduct);
+
         productRepository.update(existingProduct);
     }
 
