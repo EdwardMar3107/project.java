@@ -49,7 +49,7 @@ public class ProductService {
     }
 
     public void updateProduct(ProductDTO productDTO) throws RepositoryException {
-        ValidationUtils.checkNotNull(productDTO, "productDTO cannot be null");
+        ValidationUtils.checkNotNull(productDTO, "ProductDTO cannot be null");
         ValidationUtils.checkId(productDTO.getId(), "Product");
 
         Product existingProduct = productRepository.findById(productDTO.getId());

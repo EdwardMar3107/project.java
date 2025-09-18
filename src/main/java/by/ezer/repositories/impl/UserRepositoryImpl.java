@@ -3,6 +3,7 @@ package by.ezer.repositories.impl;
 import by.ezer.exceptions.RepositoryException;
 import by.ezer.models.User;
 import by.ezer.repositories.api.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -10,14 +11,12 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
     private final Session session;
     private Transaction transaction;
     private static final String FROM_USER = "FROM User";
-    public UserRepositoryImpl(Session session) {
-        this.session = session;
-    }
 
     @Override
     public List<User> findAll() throws RepositoryException {

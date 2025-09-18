@@ -3,6 +3,7 @@ package by.ezer.repositories.impl;
 import by.ezer.exceptions.RepositoryException;
 import by.ezer.models.Product;
 import by.ezer.repositories.api.ProductRepository;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -10,15 +11,12 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 
-
+@RequiredArgsConstructor
 public class ProductRepositoryImpl implements ProductRepository {
 
     private final Session session;
     private Transaction transaction;
     private static final String FROM_PRODUCT = "FROM Product";
-    public ProductRepositoryImpl(Session session) {
-        this.session = session;
-    }
 
     @Override
     public List<Product> findAll() throws  RepositoryException {
