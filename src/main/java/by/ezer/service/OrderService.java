@@ -10,6 +10,8 @@ import by.ezer.models.User;
 import by.ezer.repositories.api.OrderRepository;
 import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 
 import java.util.HashSet;
@@ -17,30 +19,30 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    public OrderService(Session session) {
-        this.orderRepository = new by.ezer.repositories.impl.OrderRepositoryImpl(session);
-        this.userRepository = new by.ezer.repositories.impl.UserRepositoryImpl(session);
-        this.productRepository = new by.ezer.repositories.impl.ProductRepositoryImpl(session);
-    }
 
     public OrderDTO createOrder(OrderCreateDTO orderCreateDTO) throws RepositoryException {
         if (orderCreateDTO == null) {
+            log.error("OrderCreateDTO is null");
             throw new RepositoryException("OrderCreateDTO cannot be null");
         }
         if (orderCreateDTO.getDate() == null) {
+            log.error("OrderCreateDTO's date is null");
             throw new RepositoryException("Order date cannot be null");
         }
         if (orderCreateDTO.getStatus() == null) {
+            log.error("OrderCreateDTO's status is null");
             throw new RepositoryException("Order status cannot be null");
         }
         User user = userRepository.findById(orderCreateDTO.getUserId());
         if (user == null) {
-            throw new RepositoryException("User with id " + orderCreateDTO.getUserId() + " not found");
+            handleNotFound(orderCreateDTO.getUserId(), "User");
         }
 
         List<Product> products = orderCreateDTO.getProductIds().stream()
@@ -62,13 +64,14 @@ public class OrderService {
         order.setProducts(new HashSet<>(products));
 
         orderRepository.create(order);
+        log.info("Order created");
         return OrderMapper.INSTANCE.toDTO(order);
     }
 
     public OrderDTO getOrderById(Long id) throws RepositoryException {
         Order order = orderRepository.findById(id);
         if (order == null) {
-            throw new RepositoryException("Order with id " + id + " not found");
+            handleNotFound(id, "Order");
         }
         return OrderMapper.INSTANCE.toDTO(order);
     }
@@ -82,15 +85,16 @@ public class OrderService {
 
     public void updateOrder(OrderDTO orderDTO) throws RepositoryException {
         if (orderDTO == null || orderDTO.getId() == null) {
+            log.error("OrderDTO is null or ID is null");
             throw new RepositoryException("OrderDTO or ID cannot be null");
         }
         Order existingOrder = orderRepository.findById(orderDTO.getId());
         if (existingOrder == null) {
-            throw new RepositoryException("Order with ID " + orderDTO.getId() + " not found");
+            handleNotFound(orderDTO.getId(), "Order");
         }
         User user = userRepository.findById(orderDTO.getUserId());
         if (user == null) {
-            throw new RepositoryException("User with id " + orderDTO.getUserId() + " not found");
+            handleNotFound(orderDTO.getUserId(), "User");
         }
 
         OrderMapper.INSTANCE.updateOrderFromDTO(orderDTO, existingOrder); // Обновляем поля
@@ -108,11 +112,20 @@ public class OrderService {
                     .filter(Objects::nonNull)
                     .toList();
             existingOrder.getProducts().clear();
+            existingOrder.getProducts().addAll(newProducts);
         }
         orderRepository.update(existingOrder);
+        log.info("Order updated");
     }
 
     public void deleteOrder(Long id) throws RepositoryException {
         orderRepository.delete(id);
+        log.info("Order deleted");
+    }
+
+    private void handleNotFound(Long id, String entityType) throws  RepositoryException {
+        String errorMessage = entityType + " with id " + id + " not found";
+        log.error(errorMessage);
+        throw new RepositoryException(errorMessage);
     }
 }

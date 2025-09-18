@@ -17,6 +17,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.40'
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
 }
 
 java {
