@@ -1,28 +1,20 @@
 package by.ezer.dto.productDTO;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class ProductDTO {
-
     private Long id;
     private String name;
     private BigDecimal price;
     private Boolean isAvailable;
     private LocalDate createdAt;
-
-    public ProductDTO(Long id, String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.isAvailable = isAvailable;
-        this.createdAt = createdAt;
-    }
 }

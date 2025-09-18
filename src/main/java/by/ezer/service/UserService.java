@@ -6,6 +6,7 @@ import by.ezer.exceptions.RepositoryException;
 import by.ezer.mappers.UserMapper;
 import by.ezer.models.User;
 import by.ezer.repositories.api.UserRepository;
+import by.ezer.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -19,14 +20,9 @@ public class UserService {
     private final UserRepository userRepository;
 
     public UserDTO createUser(UserCreateDTO userCreateDTO) throws RepositoryException {
-        if (userCreateDTO == null) {
-            log.error("UserCreateDTO is null");
-            throw new RepositoryException("UserCreateDTO cannot be null");
-        }
-        if (userCreateDTO.getName() == null || userCreateDTO.getBirthDate() == null) {
-            log.warn("Name or birth date is missing");
-            throw new RepositoryException("Name and birth date are required");
-        }
+        ValidationUtils.checkNotNull(userCreateDTO, "UserCreateDTO cannot be null");
+        ValidationUtils.checkNotNull(userCreateDTO.getName(), "User name cannot be null");
+        ValidationUtils.checkNotNull(userCreateDTO.getPassword(), "User password cannot be null");
 
         User user = UserMapper.INSTANCE.toEntity(userCreateDTO);
         userRepository.create(user);
@@ -35,6 +31,8 @@ public class UserService {
     }
 
     public UserDTO getUserById(Long id) throws RepositoryException {
+        ValidationUtils.checkId(id, "User");
+
         User user = userRepository.findById(id);
         if (user == null) {
             handleNotFound(id);
@@ -50,10 +48,9 @@ public class UserService {
     }
 
     public void updateUser(UserDTO userDTO) throws RepositoryException {
-        if (userDTO == null || userDTO.getId() == null) {
-            log.error("UserDTO is null");
-            throw new RepositoryException("UserDTO or ID cannot be null");
-        }
+        ValidationUtils.checkNotNull(userDTO, "UserDTO cannot be null");
+        ValidationUtils.checkId(userDTO.getId(), "User");
+
         User existingUser = userRepository.findById(userDTO.getId());
         if (existingUser == null) {
             handleNotFound(userDTO.getId());
@@ -65,6 +62,8 @@ public class UserService {
     }
 
     public void deleteUser(Long id) throws RepositoryException {
+        ValidationUtils.checkId(id, "User");
+
         userRepository.delete(id);
         log.info("User deleted");
     }

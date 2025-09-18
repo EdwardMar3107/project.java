@@ -1,25 +1,18 @@
 package by.ezer.dto.userDTO;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class UserDTO {
-
     private Long id;
     private String name;
     private String surname;
     private LocalDate birthDate;
-
-    public UserDTO(Long id, String name, String surname, LocalDate birthDate) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
-        this.birthDate = birthDate;
-    }
 }

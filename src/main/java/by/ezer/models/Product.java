@@ -2,6 +2,7 @@ package by.ezer.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,10 +13,11 @@ import java.util.Set;
 
 @Entity
 @Table (name = "products")
-@Getter
-@Setter
-@ToString
+@Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Product {
 
     @Id
@@ -37,11 +39,4 @@ public class Product {
 
     @ManyToMany(mappedBy = "products")
     private Set<Order> orders = new HashSet<>();
-
-    public Product (String name, BigDecimal price, Boolean isAvailable, LocalDate createdAt) {
-        this.name = name;
-        this.price = price;
-        this.isAvailable = isAvailable;
-        this.createdAt = createdAt;
-    }
 }

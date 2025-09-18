@@ -2,6 +2,7 @@ package by.ezer.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,10 +12,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "orders")
-@Getter
-@Setter
-@ToString
+@Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Order {
 
     @Id
@@ -37,12 +39,4 @@ public class Order {
     inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private Set<Product> products = new HashSet<>();
-
-    public Order (User user, LocalDate date, String status, Set<Product> products) {
-        this.user = user;
-        this.date = date;
-        this.status = status;
-        this.products = products != null ? new HashSet<>(products) : new HashSet<>();
-
-    }
 }

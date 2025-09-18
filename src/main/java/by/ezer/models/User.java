@@ -2,6 +2,7 @@ package by.ezer.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,10 +10,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
-@ToString
+@Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class User {
 
     @Id
@@ -37,12 +39,4 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
-
-    public User(String name, String surname, String login, String password, LocalDate birthDate) {
-        this.name = name;
-        this.surname = surname;
-        this.login = login;
-        this.password = password;
-        this.birthDate = birthDate;
-    }
 }

@@ -10,6 +10,7 @@ import by.ezer.models.User;
 import by.ezer.repositories.api.OrderRepository;
 import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
+import by.ezer.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -28,18 +29,11 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     public OrderDTO createOrder(OrderCreateDTO orderCreateDTO) throws RepositoryException {
-        if (orderCreateDTO == null) {
-            log.error("OrderCreateDTO is null");
-            throw new RepositoryException("OrderCreateDTO cannot be null");
-        }
-        if (orderCreateDTO.getDate() == null) {
-            log.error("OrderCreateDTO's date is null");
-            throw new RepositoryException("Order date cannot be null");
-        }
-        if (orderCreateDTO.getStatus() == null) {
-            log.error("OrderCreateDTO's status is null");
-            throw new RepositoryException("Order status cannot be null");
-        }
+        ValidationUtils.checkNotNull(orderCreateDTO, "OrderCreateDTO cannot be null");
+        ValidationUtils.checkNotNull(orderCreateDTO.getDate(), "Order date cannot be null");
+        ValidationUtils.checkNotNull(orderCreateDTO.getStatus(), "Order status cannot be null");
+        ValidationUtils.checkId(orderCreateDTO.getUserId(), "User");
+
         User user = userRepository.findById(orderCreateDTO.getUserId());
         if (user == null) {
             handleNotFound(orderCreateDTO.getUserId(), "User");
@@ -56,7 +50,7 @@ public class OrderService {
                 .filter(Objects::nonNull)
                 .toList();
         if (products.isEmpty() && !orderCreateDTO.getProductIds().isEmpty()) {
-            throw new RepositoryException("One or more orders not found");
+            throw new RepositoryException("One or more products not found");
         }
 
         Order order = OrderMapper.INSTANCE.toEntity(orderCreateDTO);
@@ -69,6 +63,8 @@ public class OrderService {
     }
 
     public OrderDTO getOrderById(Long id) throws RepositoryException {
+        ValidationUtils.checkId(id, "Order");
+
         Order order = orderRepository.findById(id);
         if (order == null) {
             handleNotFound(id, "Order");
@@ -84,10 +80,10 @@ public class OrderService {
     }
 
     public void updateOrder(OrderDTO orderDTO) throws RepositoryException {
-        if (orderDTO == null || orderDTO.getId() == null) {
-            log.error("OrderDTO is null or ID is null");
-            throw new RepositoryException("OrderDTO or ID cannot be null");
-        }
+        ValidationUtils.checkNotNull(orderDTO, "OrderDTO cannot be null");
+        ValidationUtils.checkId(orderDTO.getId(), "Order");
+        ValidationUtils.checkId(orderDTO.getUserId(), "User");
+
         Order existingOrder = orderRepository.findById(orderDTO.getId());
         if (existingOrder == null) {
             handleNotFound(orderDTO.getId(), "Order");
@@ -119,6 +115,8 @@ public class OrderService {
     }
 
     public void deleteOrder(Long id) throws RepositoryException {
+        ValidationUtils.checkId(id, "Order");
+
         orderRepository.delete(id);
         log.info("Order deleted");
     }

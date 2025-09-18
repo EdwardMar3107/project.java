@@ -6,6 +6,7 @@ import by.ezer.exceptions.RepositoryException;
 import by.ezer.mappers.ProductMapper;
 import by.ezer.models.Product;
 import by.ezer.repositories.api.ProductRepository;
+import by.ezer.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
@@ -19,14 +20,9 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     public ProductDTO createProduct(ProductCreateDTO productCreateDTO) throws RepositoryException {
-        if (productCreateDTO == null) {
-            log.error("productCreateDTO is null");
-            throw new RepositoryException("ProductCreateDTO cannot be null");
-        }
-        if (productCreateDTO.getName() == null || productCreateDTO.getPrice() == null) {
-            log.error("productCreateDTO.getName() or productCreateDTO.getPrice() is null");
-            throw new RepositoryException("Name and price are required");
-        }
+        ValidationUtils.checkNotNull(productCreateDTO, "productCreateDTO cannot be null");
+        ValidationUtils.checkNotNull(productCreateDTO.getName(), "Product name cannot be null");
+        ValidationUtils.checkNotNull(productCreateDTO.getPrice(), "Product price cannot be null");
 
         Product product = ProductMapper.INSTANCE.toEntity(productCreateDTO);
 
@@ -36,6 +32,8 @@ public class ProductService {
     }
 
     public ProductDTO getProductById(Long id) throws RepositoryException {
+        ValidationUtils.checkId(id, "Product");
+
         Product product = productRepository.findById(id);
         if (product == null) {
             handleNotFound(id);
@@ -51,10 +49,9 @@ public class ProductService {
     }
 
     public void updateProduct(ProductDTO productDTO) throws RepositoryException {
-        if (productDTO == null || productDTO.getId() == null) {
-            log.error("productDTO is null");
-            throw new RepositoryException("ProductDTO or ID cannot be null");
-        }
+        ValidationUtils.checkNotNull(productDTO, "productDTO cannot be null");
+        ValidationUtils.checkId(productDTO.getId(), "Product");
+
         Product existingProduct = productRepository.findById(productDTO.getId());
         if (existingProduct == null) {
             handleNotFound(productDTO.getId());
@@ -66,6 +63,8 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) throws RepositoryException {
+        ValidationUtils.checkId(id, "Product");
+
         productRepository.delete(id);
         log.info("Product deleted successfully");
     }

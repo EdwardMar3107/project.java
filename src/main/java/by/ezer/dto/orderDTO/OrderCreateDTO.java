@@ -1,25 +1,20 @@
 package by.ezer.dto.orderDTO;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
+@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class OrderCreateDTO {
-
     private Long userId;
     private LocalDate date;
     private String status;
     private List<Long> productIds;
-
-    public OrderCreateDTO(Long userId, LocalDate date, String status, List<Long> productIds) {
-        this.userId = userId;
-        this.date = date;
-        this.status = status;
-        this.productIds = productIds != null ? new ArrayList<>(productIds) : new ArrayList<>();
-    }
 }
