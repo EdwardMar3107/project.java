@@ -10,120 +10,67 @@ import by.ezer.models.User;
 import by.ezer.repositories.api.OrderRepository;
 import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
-import by.ezer.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-@Slf4j
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
 
-    public OrderDTO createOrder(OrderCreateDTO orderCreateDTO) throws RepositoryException {
-        ValidationUtils.checkNotNull(orderCreateDTO, "OrderCreateDTO cannot be null");
-        ValidationUtils.checkNotNull(orderCreateDTO.getDate(), "Order date cannot be null");
-        ValidationUtils.checkNotNull(orderCreateDTO.getStatus(), "Order status cannot be null");
-        ValidationUtils.checkId(orderCreateDTO.getUserId(), "User");
-
+    public OrderDTO save(OrderCreateDTO orderCreateDTO) throws RepositoryException {
         User user = userRepository.findById(orderCreateDTO.getUserId());
         if (user == null) {
-            handleNotFound(orderCreateDTO.getUserId(), "User");
+            throw new RepositoryException("User with id " + orderCreateDTO.getUserId() + " not found");
         }
 
-        List<Product> products = orderCreateDTO.getProductIds().stream()
-                .map(productId -> {
-                    try {
-                        return productRepository.findById(productId);
-                    } catch (RepositoryException e) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .toList();
-        if (products.isEmpty() && !orderCreateDTO.getProductIds().isEmpty()) {
+        Order order = orderMapper.toEntity(orderCreateDTO, productRepository, userRepository);
+        Set<Product> products = order.getProducts();
+        if (products == null || (products.isEmpty() && orderCreateDTO.getProductIds() != null && !orderCreateDTO.getProductIds().isEmpty())) {
             throw new RepositoryException("One or more products not found");
         }
 
-        Order order = OrderMapper.INSTANCE.toEntity(orderCreateDTO);
-        order.setUser(user);
-        order.setProducts(new HashSet<>(products));
-
         orderRepository.create(order);
-        log.info("Order created");
-        return OrderMapper.INSTANCE.toDTO(order);
+        return orderMapper.toDTO(order);
     }
 
-    public OrderDTO getOrderById(Long id) throws RepositoryException {
-        ValidationUtils.checkId(id, "Order");
-
+    public OrderDTO findById(Long id) throws RepositoryException {
         Order order = orderRepository.findById(id);
         if (order == null) {
-            handleNotFound(id, "Order");
+            throw new RepositoryException("Order with id " + id + " not found");
         }
-        return OrderMapper.INSTANCE.toDTO(order);
+        return orderMapper.toDTO(order);
     }
 
-    public List<OrderDTO> getAllOrders() throws RepositoryException {
+    public List<OrderDTO> findAll() throws RepositoryException {
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
-                .map(OrderMapper.INSTANCE::toDTO)
-                .collect(Collectors.toList());
+                .map(orderMapper::toDTO)
+                .toList();
     }
 
-    public void updateOrder(OrderDTO orderDTO) throws RepositoryException {
-        ValidationUtils.checkNotNull(orderDTO, "OrderDTO cannot be null");
-        ValidationUtils.checkId(orderDTO.getId(), "Order");
-        ValidationUtils.checkId(orderDTO.getUserId(), "User");
-
+    public void update(OrderDTO orderDTO) throws RepositoryException {
         Order existingOrder = orderRepository.findById(orderDTO.getId());
         if (existingOrder == null) {
-            handleNotFound(orderDTO.getId(), "Order");
+            throw new RepositoryException("Order with id " + orderDTO.getId() + " not found");
         }
         User user = userRepository.findById(orderDTO.getUserId());
         if (user == null) {
-            handleNotFound(orderDTO.getUserId(), "User");
+            throw new RepositoryException("User with id " + orderDTO.getUserId() + " not found");
         }
 
-        OrderMapper.INSTANCE.updateOrderFromDTO(orderDTO, existingOrder); // Обновляем поля
+        orderMapper.updateOrderFromDTO(orderDTO, existingOrder, productRepository);
         existingOrder.setUser(user);
 
-        if (orderDTO.getProductIds() != null) {
-            List<Product> newProducts = orderDTO.getProductIds().stream()
-                    .map(productId -> {
-                        try {
-                            return productRepository.findById(productId);
-                        } catch (RepositoryException e) {
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .toList();
-            existingOrder.getProducts().clear();
-            existingOrder.getProducts().addAll(newProducts);
-        }
         orderRepository.update(existingOrder);
-        log.info("Order updated");
     }
 
-    public void deleteOrder(Long id) throws RepositoryException {
-        ValidationUtils.checkId(id, "Order");
-
+    public void delete(Long id) throws RepositoryException {
         orderRepository.delete(id);
-        log.info("Order deleted");
-    }
-
-    private void handleNotFound(Long id, String entityType) throws  RepositoryException {
-        String errorMessage = entityType + " with id " + id + " not found";
-        log.error(errorMessage);
-        throw new RepositoryException(errorMessage);
     }
 }
