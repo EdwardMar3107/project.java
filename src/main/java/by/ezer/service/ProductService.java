@@ -6,10 +6,7 @@ import by.ezer.exceptions.RepositoryException;
 import by.ezer.mappers.ProductMapper;
 import by.ezer.models.Product;
 import by.ezer.repositories.api.ProductRepository;
-import by.ezer.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
 
 import java.util.List;
 import java.util.stream.Collectors;

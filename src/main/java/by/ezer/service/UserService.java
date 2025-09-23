@@ -6,15 +6,11 @@ import by.ezer.exceptions.RepositoryException;
 import by.ezer.mappers.UserMapper;
 import by.ezer.models.User;
 import by.ezer.repositories.api.UserRepository;
-import by.ezer.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
