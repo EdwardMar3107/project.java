@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group = 'by.ezer'          // изменил на твой пакет
+group = 'by.ezer'
 version = '1.0.0'
 
 repositories {
