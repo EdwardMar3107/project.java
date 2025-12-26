@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()  // Загружает зависимости из Maven Central
+}
+
+dependencies {
+    // PostgreSQL JDBC драйвер
+    implementation 'org.postgresql:postgresql:42.7.3'
+
+    // Для логирования (опционально)
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+
+    // Для работы с .env файлами (опционально)
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+    // Для тестов
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)  // или ваша версия Java
+    }
+}
+
+application {
+    mainClass = 'by.ezer.Main'  // Главный класс для запуска
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
