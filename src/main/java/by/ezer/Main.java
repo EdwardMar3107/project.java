@@ -10,7 +10,7 @@ public class Main {
     public static final String DELETE_SQL = "DELETE FROM users WHERE id = ?";
 
     public static void main(String[] args) {
-
+        
     }
 
     public static void create(String name, int age, String email) {

@@ -3,35 +3,48 @@ plugins {
     id 'application'
 }
 
-group = 'com.example'
+group = 'by.ezer'          // изменил на твой пакет
 version = '1.0.0'
 
 repositories {
-    mavenCentral()  // Загружает зависимости из Maven Central
+    mavenCentral()
 }
 
 dependencies {
-    // PostgreSQL JDBC драйвер
-    implementation 'org.postgresql:postgresql:42.7.3'
+    // Hibernate ORM 7.2 (включает JPA API)
+    implementation 'org.hibernate.orm:hibernate-core:7.2.0.Final'
 
-    // Для логирования (опционально)
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    // Явно JPA API (на случай проблем с импортами в IDE)
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 
-    // Для работы с .env файлами (опционально)
-    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+    // PostgreSQL драйвер
+    runtimeOnly 'org.postgresql:postgresql:42.7.3'
 
-    // Для тестов
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    // H2 база в памяти — для быстрого тестирования (очень удобно!)
+    runtimeOnly 'com.h2database:h2:2.3.230'
+
+    // Логирование
+    implementation 'org.slf4j:slf4j-simple:2.0.16'  // обновил до свежей
+
+    // Dotenv для .env файлов (если захочешь вынести credentials)
+    implementation 'io.github.cdimascio:dotenv-java:3.0.2'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // Тесты
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)  // или ваша версия Java
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
 application {
-    mainClass = 'by.ezer.Main'  // Главный класс для запуска
+    mainClass = 'by.ezer.Main'
 }
 
 tasks.named('test') {
