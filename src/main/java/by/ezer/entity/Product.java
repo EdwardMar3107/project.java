@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -24,9 +26,13 @@ public class Product {
     @Column(nullable = false, length = 2000)
     private String description;
 
+    @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
+    List<Order> orders = new ArrayList<>();
+
     public Product(String name, BigDecimal price, String description) {
         this.name = name;
         this.price = price;
         this.description = description;
+        this.orders = new ArrayList<>();
     }
 }
