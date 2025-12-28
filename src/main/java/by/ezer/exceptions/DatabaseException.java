@@ -1,4 +1,4 @@
-package by.ezer;
+package by.ezer.exceptions;
 
 public class DatabaseException extends RuntimeException {
 
