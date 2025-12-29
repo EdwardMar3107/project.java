@@ -19,18 +19,18 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, length = 255)
-    private String name;
+    @Column(name = "product_name", nullable = false, length = 255)
+    private String productname;
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
     @Column(nullable = false, length = 2000)
     private String description;
 
     @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
-    List<Order> orders = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 
-    public Product(String name, BigDecimal price, String description) {
-        this.name = name;
+    public Product(String productname, BigDecimal price, String description) {
+        this.productname = productname;
         this.price = price;
         this.description = description;
         this.orders = new ArrayList<>();

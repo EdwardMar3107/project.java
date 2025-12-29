@@ -6,6 +6,8 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>by.ezer.entity.User</class>
+        <class>by.ezer.entity.Product</class>
+        <class>by.ezer.entity.Order</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>

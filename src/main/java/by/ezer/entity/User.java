@@ -18,8 +18,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "user_name", nullable = false)
+    private String username;
     @Column(nullable = false)
     private int age;
     @Column(nullable = false, unique = true)
@@ -28,8 +28,8 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<Order> orders = new ArrayList<>();
 
-    public User(String name, int age, String email) {
-        this.name = name;
+    public User(String username, int age, String email) {
+        this.username = username;
         this.age = age;
         this.email = email;
         this.orders = new ArrayList<>();
