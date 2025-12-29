@@ -11,6 +11,6 @@ public class DatabaseException extends RuntimeException {
     }
 
     public DatabaseException(Throwable cause) {
-        super("Ошибка работы с Database",cause);
+        super("Error with Database",cause);
     }
 }
