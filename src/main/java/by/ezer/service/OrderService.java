@@ -24,19 +24,19 @@ public class OrderService {
     private final UserRepository userRepository = new UserRepository();
     private final ProductRepository productRepository =new ProductRepository();
 
-    //Создаем метод: Создания Заказа
+    //Создаем метод: Создание Заказа
     public OrderDTO createOrder(String userEmail, List<Long> productIds) {
 
         //Находим пользователей по почте
             Optional<User> userOpt = userRepository.findByEmail(userEmail);
-            //Возвращаем пользователя есть таковой имеется, в ином случае исключение
+            //Возвращаем пользователя если таковой имеется, в ином случае исключение
             User user = userOpt.orElseThrow(() -> new RuntimeException("User not found" + userEmail));
 
             //Создаем переменную, которая будет хранить сумму заказов, а также список продуктов
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<Product> products = new ArrayList<>();
 
-        //С помощью циклам проходимся по заказам и добавляем их в total, в ином случаем - исключение, если их нет
+        //С помощью цикла проходимся по заказам и добавляем их в total, в ином случаем - исключение, если их нет
         for (Long productId : productIds) {
 
             Optional<Product> productOpt = productRepository.findById(productId);
