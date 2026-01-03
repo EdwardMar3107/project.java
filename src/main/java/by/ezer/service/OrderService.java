@@ -36,7 +36,7 @@ public class OrderService {
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<Product> products = new ArrayList<>();
 
-        //С помощью циклам проходимся по заказам и добавляем их в total, в ином случаем - исключение
+        //С помощью циклам проходимся по заказам и добавляем их в total, в ином случаем - исключение, если их нет
         for (Long productId : productIds) {
 
             Optional<Product> productOpt = productRepository.findById(productId);
