@@ -20,7 +20,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "product_name", nullable = false, length = 255)
-    private String productname;
+    private String productName;
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
     @Column(nullable = false, length = 2000)
@@ -29,8 +29,8 @@ public class Product {
     @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 
-    public Product(String productname, BigDecimal price, String description) {
-        this.productname = productname;
+    public Product(String productName, BigDecimal price, String description) {
+        this.productName = productName;
         this.price = price;
         this.description = description;
         this.orders = new ArrayList<>();

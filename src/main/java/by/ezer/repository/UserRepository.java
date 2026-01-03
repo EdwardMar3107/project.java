@@ -39,6 +39,20 @@ public class UserRepository {
         }
     }
 
+    public Optional<User> findByEmail(String email) {
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
+            query.setParameter("email", email);
+            try {
+                return Optional.of(query.getSingleResult());
+            } catch (jakarta.persistence.NoResultException e) {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            throw new RepositoryException("Error finding user by email: " + email, e);
+        }
+    }
+
     public void update(User user) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
