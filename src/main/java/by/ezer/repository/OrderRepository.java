@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public class OrderRepository {
 
+    //Пояснение в UserRepository
     public void save(Order order) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
@@ -21,6 +22,7 @@ public class OrderRepository {
         }
     }
 
+    //Пояснение в UserRepository
     public Optional<Order> findById(Long id) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             Order order = em.find(Order.class, id);
@@ -30,6 +32,7 @@ public class OrderRepository {
         }
     }
 
+    //Есть похожее объяснение в UserRepository
     public List<Order> findByUserId(Long userId) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.user.id = :userId", Order.class);
@@ -40,6 +43,35 @@ public class OrderRepository {
         }
     }
 
+    //Зачем FETCH JOIN?
+    //Без него при обращении к order.getProducts() или order.getUser() вне сессии была бы ошибка LazyInitializationException.
+    public Optional<Order> findByIdWithDetails(Long id) {
+        //Открываем сессию с БД
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            //Создаём запрос к БД с помощью JPQL
+            TypedQuery<Order> query = em.createQuery(
+                    //"Выбери заказ (назовём его o) из всех заказов"
+                    "SELECT o FROM Order o " +
+                            //o.products — список продуктов в заказе (lazy-связь),
+                            //FETCH заставляет Hibernate загрузить продукты сразу вместе с заказом
+                            //LEFT — даже если продуктов нет, заказ всё равно вернётся
+                            "LEFT JOIN FETCH o.products " +
+                            "LEFT JOIN FETCH o.user " +
+                            //Ищем заказ с конкретным id.
+                            "WHERE o.id = :id", Order.class);
+            //Подставляем реальное значение id в запрос.
+            query.setParameter("id", id);
+            //Пытаемся получить единственный результат, который оборачиваем в Optional
+            try {
+                return Optional.of(query.getSingleResult());
+            } catch (jakarta.persistence.NoResultException e) {
+                //Если - нет, возвращаем пустой Optional без ошибки
+                return Optional.empty();
+            }
+        }
+    }
+
+    //Пояснение в UserRepository
     public List<Order> findAll() {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o", Order.class);
@@ -49,6 +81,7 @@ public class OrderRepository {
         }
     }
 
+    //Пояснение в UserRepository
     public void update(Order order) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();

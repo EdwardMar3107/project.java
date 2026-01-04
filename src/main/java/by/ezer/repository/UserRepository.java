@@ -11,19 +11,27 @@ import java.util.Optional;
 
 public class UserRepository {
 
+    //Метод, который сохраняет пользователя
     public void save(User user) {
+        //Соединяемся с БД
         try (EntityManager em = HibernateUtil.getEntityManager();) {
+            //Открываем транзакцию
             em.getTransaction().begin();
+            //Сохраняем пользователя
             em.persist(user);
+            //Коммитим транзакцию
             em.getTransaction().commit();
         } catch (Exception e) {
             throw new RepositoryException(e);
         }
     }
 
+    //Поиск пользователя по id
     public Optional<User> findById(Long id) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
+            //Находим пользователя по id
             User user = em.find(User.class, id);
+            //Возвращаем пользователя и оборачиваем если есть, если null - вернется пустой Optional
             return Optional.ofNullable(user);
         } catch (Exception e) {
             throw new RepositoryException(e);
@@ -39,6 +47,28 @@ public class UserRepository {
         }
     }
 
+    //Optional чтобы не было null
+    public Optional<User> findByName(String name) {
+        //Открываем TWR
+      try (EntityManager em = HibernateUtil.getEntityManager();) {
+          //JPQL запрос: Найди пользователей, у которых поле name равно переданному параметру у объекта
+          TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.name = :name", User.class);
+          //Устанавливаем значение параметра name
+          query.setParameter("name", name);
+          //Пытаемся получить единственный результат
+          try {
+              //Если пользователь найдеН, то оборачиваем его в Optional
+              return Optional.of(query.getSingleResult());
+          } catch (jakarta.persistence.NoResultException e) {
+              //Если - нет, то возвращаем пустой Optional без ошибки
+              return Optional.empty();
+          }
+      } catch (Exception e) {
+          throw new RepositoryException(e);
+      }
+    }
+
+    //Пояснение в методу findByName
     public Optional<User> findByEmail(String email) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
@@ -56,6 +86,7 @@ public class UserRepository {
     public void update(User user) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
+            //Обновляем пользователя
             em.merge(user);
             em.getTransaction().commit();
         } catch (Exception e) {

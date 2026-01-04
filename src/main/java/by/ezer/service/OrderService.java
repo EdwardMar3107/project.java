@@ -73,4 +73,28 @@ public class OrderService {
                         .toList())
                 .build();
     }
+
+    public OrderDTO getOrderById(Long id) {
+
+        Optional<Order> orderOpt = orderRepository.findByIdWithDetails(id);
+        Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
+
+        List<ProductDTO> productDTOs = order.getProducts().stream()
+                .map(p -> ProductDTO.builder()
+                        .id(p.getId())
+                        .name(p.getProductName())
+                        .price(p.getPrice())
+                        .description(p.getDescription())
+                        .build())
+                .toList();
+
+        return OrderDTO.builder()
+                .id(order.getId())
+                .orderDate(order.getOrderDate())
+                .totalAmount(order.getTotalAmount())
+                .userName(order.getUser().getUsername())
+                .userEmail(order.getUser().getEmail())
+                .products(productDTOs)
+                .build();
+    }
 }

@@ -26,9 +26,11 @@ public class Product {
     @Column(nullable = false, length = 2000)
     private String description;
 
+    //Пояснение в User Entity
     @ManyToMany(mappedBy = "products", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 
+    //Пояснение в User Entity
     public Product(String productName, BigDecimal price, String description) {
         this.productName = productName;
         this.price = price;

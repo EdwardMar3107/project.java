@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public class ProductRepository {
 
+    //Пояснение в UserRepository
     public void save(Product product) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             em.getTransaction().begin();
@@ -21,6 +22,7 @@ public class ProductRepository {
         }
     }
 
+    //Пояснение в UserRepository
     public Optional<Product> findById(Long id) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             Product product = em.find(Product.class, id);
@@ -30,6 +32,7 @@ public class ProductRepository {
         }
     }
 
+    //Пояснение в UserRepository
     public List<Product> findAll() {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p", Product.class);
@@ -39,6 +42,18 @@ public class ProductRepository {
         }
     }
 
+    //Есть похожее объяснение в UserRepository
+    public List<Product> findByNameContaining(String namePart) {
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(:namePart)", Product.class);
+            query.setParameter("namePart", "%" + namePart.toLowerCase() + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new RepositoryException(e);
+        }
+    }
+
+    //Пояснение в UserRepository
     public void update(Product product) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             em.getTransaction().begin();
