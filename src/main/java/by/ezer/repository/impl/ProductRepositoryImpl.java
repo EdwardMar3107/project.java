@@ -1,17 +1,20 @@
-package by.ezer.repository;
+package by.ezer.repository.impl;
 
 import by.ezer.entity.Product;
 import by.ezer.exceptions.RepositoryException;
+import by.ezer.repository.api.ProductRepository;
 import by.ezer.util.HibernateUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ProductRepository {
+public class ProductRepositoryImpl implements ProductRepository {
 
     //Пояснение в UserRepository
+    @Override
     public void save(Product product) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             em.getTransaction().begin();
@@ -23,6 +26,7 @@ public class ProductRepository {
     }
 
     //Пояснение в UserRepository
+    @Override
     public Optional<Product> findById(Long id) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             Product product = em.find(Product.class, id);
@@ -33,6 +37,7 @@ public class ProductRepository {
     }
 
     //Пояснение в UserRepository
+    @Override
     public List<Product> findAll() {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p", Product.class);
@@ -43,6 +48,7 @@ public class ProductRepository {
     }
 
     //Есть похожее объяснение в UserRepository
+    @Override
     public List<Product> findByNameContaining(String namePart) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(:namePart)", Product.class);
@@ -54,6 +60,7 @@ public class ProductRepository {
     }
 
     //Пояснение в UserRepository
+    @Override
     public void update(Product product) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             em.getTransaction().begin();
@@ -64,6 +71,7 @@ public class ProductRepository {
         }
     }
 
+    @Override
     public void deleteById(Long id) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             em.getTransaction().begin();

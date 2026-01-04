@@ -5,10 +5,9 @@ import by.ezer.dto.ProductDTO;
 import by.ezer.entity.Order;
 import by.ezer.entity.Product;
 import by.ezer.entity.User;
-import by.ezer.repository.OrderRepository;
-import by.ezer.repository.ProductRepository;
-import by.ezer.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import by.ezer.repository.impl.OrderRepositoryImpl;
+import by.ezer.repository.impl.ProductRepositoryImpl;
+import by.ezer.repository.impl.UserRepositoryImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,9 +19,9 @@ import java.util.Optional;
 public class OrderService {
 
     //Добавляем Репы, потому что сервисы работают с ними
-    private final OrderRepository orderRepository = new OrderRepository();
-    private final UserRepository userRepository = new UserRepository();
-    private final ProductRepository productRepository =new ProductRepository();
+    private final OrderRepositoryImpl orderRepository = new OrderRepositoryImpl();
+    private final UserRepositoryImpl userRepository = new UserRepositoryImpl();
+    private final ProductRepositoryImpl productRepository =new ProductRepositoryImpl();
 
     //Создаем метод: Создание Заказа
     public OrderDTO createOrder(String userEmail, List<Long> productIds) {

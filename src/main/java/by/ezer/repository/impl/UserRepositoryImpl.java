@@ -1,7 +1,8 @@
-package by.ezer.repository;
+package by.ezer.repository.impl;
 
 import by.ezer.entity.User;
 import by.ezer.exceptions.RepositoryException;
+import by.ezer.repository.api.UserRepository;
 import by.ezer.util.HibernateUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -9,9 +10,10 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class UserRepository {
+public class UserRepositoryImpl implements UserRepository {
 
     //Метод, который сохраняет пользователя
+    @Override
     public void save(User user) {
         //Соединяемся с БД
         try (EntityManager em = HibernateUtil.getEntityManager();) {
@@ -27,6 +29,7 @@ public class UserRepository {
     }
 
     //Поиск пользователя по id
+    @Override
     public Optional<User> findById(Long id) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
             //Находим пользователя по id
@@ -38,6 +41,7 @@ public class UserRepository {
         }
     }
 
+    @Override
     public List<User> findAll() {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
             TypedQuery<User> query = em.createQuery("SELECT u FROM User u", User.class);
@@ -48,6 +52,7 @@ public class UserRepository {
     }
 
     //Optional чтобы не было null
+    @Override
     public Optional<User> findByName(String name) {
         //Открываем TWR
       try (EntityManager em = HibernateUtil.getEntityManager();) {
@@ -69,6 +74,7 @@ public class UserRepository {
     }
 
     //Пояснение в методу findByName
+    @Override
     public Optional<User> findByEmail(String email) {
         try (EntityManager em = HibernateUtil.getEntityManager()) {
             TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
@@ -83,6 +89,7 @@ public class UserRepository {
         }
     }
 
+    @Override
     public void update(User user) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
@@ -94,6 +101,7 @@ public class UserRepository {
         }
     }
 
+    @Override
     public void deleteById(Long id) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();

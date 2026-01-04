@@ -1,7 +1,8 @@
-package by.ezer.repository;
+package by.ezer.repository.impl;
 
 import by.ezer.entity.Order;
 import by.ezer.exceptions.RepositoryException;
+import by.ezer.repository.api.OrderRepository;
 import by.ezer.util.HibernateUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -9,9 +10,10 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
-public class OrderRepository {
+public class OrderRepositoryImpl implements OrderRepository {
 
     //Пояснение в UserRepository
+    @Override
     public void save(Order order) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
@@ -23,6 +25,7 @@ public class OrderRepository {
     }
 
     //Пояснение в UserRepository
+    @Override
     public Optional<Order> findById(Long id) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             Order order = em.find(Order.class, id);
@@ -33,6 +36,7 @@ public class OrderRepository {
     }
 
     //Есть похожее объяснение в UserRepository
+    @Override
     public List<Order> findByUserId(Long userId) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.user.id = :userId", Order.class);
@@ -45,6 +49,7 @@ public class OrderRepository {
 
     //Зачем FETCH JOIN?
     //Без него при обращении к order.getProducts() или order.getUser() вне сессии была бы ошибка LazyInitializationException.
+    @Override
     public Optional<Order> findByIdWithDetails(Long id) {
         //Открываем сессию с БД
         try (EntityManager em = HibernateUtil.getEntityManager()) {
@@ -72,6 +77,7 @@ public class OrderRepository {
     }
 
     //Пояснение в UserRepository
+    @Override
     public List<Order> findAll() {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o", Order.class);
@@ -82,6 +88,7 @@ public class OrderRepository {
     }
 
     //Пояснение в UserRepository
+    @Override
     public void update(Order order) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
@@ -92,6 +99,7 @@ public class OrderRepository {
         }
     }
 
+    @Override
     public void deleteById(Long id) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
             em.getTransaction().begin();
