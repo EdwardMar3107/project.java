@@ -1,8 +1,8 @@
-package by.ezer.repository.impl;
+package by.ezer.repositories.impl;
 
 import by.ezer.entity.Order;
 import by.ezer.exceptions.RepositoryException;
-import by.ezer.repository.api.OrderRepository;
+import by.ezer.repositories.api.OrderRepository;
 import by.ezer.util.HibernateUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

@@ -5,9 +5,13 @@ import by.ezer.dto.ProductDTO;
 import by.ezer.entity.Order;
 import by.ezer.entity.Product;
 import by.ezer.entity.User;
-import by.ezer.repository.impl.OrderRepositoryImpl;
-import by.ezer.repository.impl.ProductRepositoryImpl;
-import by.ezer.repository.impl.UserRepositoryImpl;
+import by.ezer.mappers.api.OrderMapper;
+import by.ezer.mappers.api.ProductMapper;
+import by.ezer.mappers.impl.OrderMapperImpl;
+import by.ezer.mappers.impl.ProductMapperImpl;
+import by.ezer.repositories.impl.OrderRepositoryImpl;
+import by.ezer.repositories.impl.ProductRepositoryImpl;
+import by.ezer.repositories.impl.UserRepositoryImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,6 +26,16 @@ public class OrderService {
     private final OrderRepositoryImpl orderRepository = new OrderRepositoryImpl();
     private final UserRepositoryImpl userRepository = new UserRepositoryImpl();
     private final ProductRepositoryImpl productRepository =new ProductRepositoryImpl();
+
+    //Маппер для преобразования сущности Order в DTO
+    //Выносим маппинг из сервиса для чистоты кода
+    private final OrderMapper orderMapper;
+
+    //Ручная инициализация мапперов (вручную создаём зависимости)
+    public OrderService() {
+        ProductMapper productMapper = new ProductMapperImpl();
+        this.orderMapper = new OrderMapperImpl(productMapper);
+    }
 
     //Создаем метод: Создание Заказа
     public OrderDTO createOrder(String userEmail, List<Long> productIds) {
@@ -55,22 +69,8 @@ public class OrderService {
         //Сохраняем всё дело
         userRepository.save(user);
 
-        //Преобразуем всё в DTO, чтобы создать "картинку"
-        return OrderDTO.builder()
-                .id(order.getId())
-                .orderDate(order.getOrderDate())
-                .totalAmount(order.getTotalAmount())
-                .userName(user.getUsername())
-                .userEmail(user.getEmail())
-                .products(products.stream()
-                        .map(p -> ProductDTO.builder()
-                                .id(p.getId())
-                                .name(p.getProductName())
-                                .price(p.getPrice())
-                                .description(p.getDescription())
-                                .build())
-                        .toList())
-                .build();
+        //Преобразуем всё в DTO, чтобы создать "картинку", используем маппер
+        return orderMapper.toDto(order);
     }
 
     public OrderDTO getOrderById(Long id) {
@@ -78,22 +78,7 @@ public class OrderService {
         Optional<Order> orderOpt = orderRepository.findByIdWithDetails(id);
         Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
 
-        List<ProductDTO> productDTOs = order.getProducts().stream()
-                .map(p -> ProductDTO.builder()
-                        .id(p.getId())
-                        .name(p.getProductName())
-                        .price(p.getPrice())
-                        .description(p.getDescription())
-                        .build())
-                .toList();
-
-        return OrderDTO.builder()
-                .id(order.getId())
-                .orderDate(order.getOrderDate())
-                .totalAmount(order.getTotalAmount())
-                .userName(order.getUser().getUsername())
-                .userEmail(order.getUser().getEmail())
-                .products(productDTOs)
-                .build();
+        //Используем маппер
+        return orderMapper.toDto(order);
     }
 }

@@ -1,11 +1,10 @@
-package by.ezer.repository.impl;
+package by.ezer.repositories.impl;
 
 import by.ezer.entity.Product;
 import by.ezer.exceptions.RepositoryException;
-import by.ezer.repository.api.ProductRepository;
+import by.ezer.repositories.api.ProductRepository;
 import by.ezer.util.HibernateUtil;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;

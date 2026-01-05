@@ -1,4 +1,4 @@
-package by.ezer.repository.api;
+package by.ezer.repositories.api;
 
 import by.ezer.entity.Product;
 import by.ezer.exceptions.RepositoryException;
