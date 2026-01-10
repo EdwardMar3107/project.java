@@ -1,17 +1,17 @@
 package by.ezer.service;
 
+import lombok.RequiredArgsConstructor;
+import org.mapstruct.factory.Mappers;
 import by.ezer.dto.OrderDTO;
-import by.ezer.dto.ProductDTO;
+import by.ezer.dto.PagedResult;
 import by.ezer.entity.Order;
 import by.ezer.entity.Product;
 import by.ezer.entity.User;
-import by.ezer.mappers.api.OrderMapper;
-import by.ezer.mappers.api.ProductMapper;
-import by.ezer.mappers.impl.OrderMapperImpl;
-import by.ezer.mappers.impl.ProductMapperImpl;
+import by.ezer.mappers.OrderMapper;
 import by.ezer.repositories.impl.OrderRepositoryImpl;
 import by.ezer.repositories.impl.ProductRepositoryImpl;
 import by.ezer.repositories.impl.UserRepositoryImpl;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,23 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
+@RequiredArgsConstructor
 public class OrderService {
 
     //Добавляем Репы, потому что сервисы работают с ними
-    private final OrderRepositoryImpl orderRepository = new OrderRepositoryImpl();
-    private final UserRepositoryImpl userRepository = new UserRepositoryImpl();
-    private final ProductRepositoryImpl productRepository =new ProductRepositoryImpl();
+    private final OrderRepositoryImpl orderRepository;
+    private final UserRepositoryImpl userRepository;
+    private final ProductRepositoryImpl productRepository;
 
     //Маппер для преобразования сущности Order в DTO
     //Выносим маппинг из сервиса для чистоты кода
     private final OrderMapper orderMapper;
-
-    //Ручная инициализация мапперов (вручную создаём зависимости)
-    public OrderService() {
-        ProductMapper productMapper = new ProductMapperImpl();
-        this.orderMapper = new OrderMapperImpl(productMapper);
-    }
 
     //Создаем метод: Создание Заказа
     public OrderDTO createOrder(String userEmail, List<Long> productIds) {
@@ -80,5 +74,44 @@ public class OrderService {
 
         //Используем маппер
         return orderMapper.toDto(order);
+    }
+
+    public PagedResult<OrderDTO> getAllPaged(int page, int size) {
+
+        PagedResult<Order> result = orderRepository.findAllPaged(page, size);
+
+        List<OrderDTO> dtos = result.getContent().stream()
+                .map(orderMapper::toDto)
+                .toList();
+
+        return new PagedResult<>(dtos, result.getPage(), result.getSize(), result.getTotalElements());
+    }
+
+    public List<OrderDTO> getOrdersByUserEmail(String userEmail) {
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found" + userEmail));
+
+        List<Order> orders = orderRepository.findByUserId(user.getId());
+
+        return orders.stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+
+    public void updateOrder(Long orderId, OrderDTO dto) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+
+        order.setTotalAmount(dto.totalAmount());
+        order.setOrderDate(dto.orderDate());
+
+        orderRepository.update(order);
+    }
+
+    public void deleteOrder(Long orderId) {
+
+        orderRepository.deleteById(orderId);
     }
 }

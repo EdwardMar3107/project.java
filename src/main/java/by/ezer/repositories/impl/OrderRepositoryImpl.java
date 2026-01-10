@@ -1,5 +1,6 @@
 package by.ezer.repositories.impl;
 
+import by.ezer.dto.PagedResult;
 import by.ezer.entity.Order;
 import by.ezer.exceptions.RepositoryException;
 import by.ezer.repositories.api.OrderRepository;
@@ -78,10 +79,19 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     //Пояснение в UserRepository
     @Override
-    public List<Order> findAll() {
+    public PagedResult<Order> findAllPaged(int page, int size) {
         try(EntityManager em = HibernateUtil.getEntityManager();) {
+            //Запрос на данные страницы
             TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o", Order.class);
-            return query.getResultList();
+            query.setFirstResult(page * size);
+            query.setMaxResults(size);
+            List<Order> content = query.getResultList();
+
+            //Запрос на общее количество записей
+            TypedQuery<Long> countQuery = em.createQuery("SELECT COUNT(o) FROM Order o", Long.class);
+            Long totalElements = countQuery.getSingleResult();
+
+            return new PagedResult<>(content, page, size, totalElements);
         } catch (Exception e) {
             throw new RepositoryException(e);
         }

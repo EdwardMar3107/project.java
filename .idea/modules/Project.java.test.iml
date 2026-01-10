@@ -4,7 +4,7 @@
     <output-test url="file://$MODULE_DIR$/../../build/classes/java/test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../src/test" />
-    <orderEntry type="jdk" jdkName="24" jdkType="JavaSDK" />
+    <orderEntry type="jdk" jdkName="25" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Project.java.main" />
     <orderEntry type="library" name="Gradle: org.hibernate.orm:hibernate-core:7.2.0.Final" level="project" />

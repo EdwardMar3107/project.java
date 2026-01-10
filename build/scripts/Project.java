@@ -114,7 +114,7 @@ case "$( uname )" in                #(
   NONSTOP* )        nonstop=true ;;
 esac
 
-CLASSPATH=$APP_HOME/lib/Project.java-1.0.0.jar:$APP_HOME/lib/postgresql-42.7.3.jar:$APP_HOME/lib/slf4j-simple-2.0.9.jar:$APP_HOME/lib/dotenv-java-3.0.0.jar:$APP_HOME/lib/checker-qual-3.42.0.jar:$APP_HOME/lib/slf4j-api-2.0.9.jar
+CLASSPATH=$APP_HOME/lib/Project.java-1.0.0.jar:$APP_HOME/lib/hibernate-core-7.2.0.Final.jar:$APP_HOME/lib/jakarta.persistence-api-3.2.0.jar:$APP_HOME/lib/slf4j-simple-2.0.16.jar:$APP_HOME/lib/dotenv-java-3.0.2.jar:$APP_HOME/lib/postgresql-42.7.3.jar:$APP_HOME/lib/h2-2.3.230.jar:$APP_HOME/lib/jakarta.transaction-api-2.0.1.jar:$APP_HOME/lib/hibernate-models-1.0.1.jar:$APP_HOME/lib/jboss-logging-3.6.1.Final.jar:$APP_HOME/lib/classmate-1.7.1.jar:$APP_HOME/lib/byte-buddy-1.17.8.jar:$APP_HOME/lib/jaxb-runtime-4.0.6.jar:$APP_HOME/lib/jaxb-core-4.0.6.jar:$APP_HOME/lib/jakarta.xml.bind-api-4.0.4.jar:$APP_HOME/lib/jakarta.inject-api-2.0.1.jar:$APP_HOME/lib/antlr4-runtime-4.13.2.jar:$APP_HOME/lib/slf4j-api-2.0.16.jar:$APP_HOME/lib/checker-qual-3.42.0.jar:$APP_HOME/lib/angus-activation-2.0.3.jar:$APP_HOME/lib/jakarta.activation-api-2.1.4.jar:$APP_HOME/lib/txw2-4.0.6.jar:$APP_HOME/lib/istack-commons-runtime-4.1.2.jar
 
 
 # Determine the Java command to use to start the JVM.
@@ -212,7 +212,7 @@ DEFAULT_JVM_OPTS=""
 
 set -- \
         -classpath "$CLASSPATH" \
-        com.example.Main \
+        by.ezer.Main \
         "$@"
 
 # Stop when "xargs" is not available.

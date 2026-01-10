@@ -22,7 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "user_name", nullable = false)
-    private String username;
+    private String userName;
     @Column(nullable = false)
     private int age;
     @Column(nullable = false, unique = true)
@@ -38,8 +38,8 @@ public class User {
 
     //Учитывая что есть аннотация lombok, всё равно для удобства нужно прописать конструктор
     //id генерируется автоматически с автоинкрементом
-    public User(String username, int age, String email) {
-        this.username = username;
+    public User(String userName, int age, String email) {
+        this.userName = userName;
         this.age = age;
         this.email = email;
         this.orders = new ArrayList<>();

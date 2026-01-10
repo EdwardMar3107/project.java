@@ -1,5 +1,6 @@
 package by.ezer.repositories.api;
 
+import by.ezer.dto.PagedResult;
 import by.ezer.entity.Order;
 import by.ezer.exceptions.RepositoryException;
 
@@ -11,7 +12,7 @@ public interface OrderRepository {
     Optional<Order> findById(Long id) throws RepositoryException;
     List<Order> findByUserId(Long userId) throws RepositoryException;
     Optional<Order> findByIdWithDetails(Long id) throws RepositoryException;
-    List<Order> findAll() throws RepositoryException;
+    PagedResult<Order> findAllPaged(int page, int size) throws RepositoryException;
     void update(Order order)  throws RepositoryException;
     void deleteById(Long id) throws RepositoryException;
 }

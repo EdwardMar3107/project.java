@@ -1,5 +1,6 @@
 package by.ezer.repositories.impl;
 
+import by.ezer.dto.PagedResult;
 import by.ezer.entity.User;
 import by.ezer.exceptions.RepositoryException;
 import by.ezer.repositories.api.UserRepository;
@@ -42,10 +43,17 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findAll() {
+    public PagedResult<User> findAllPaged(int page, int size) {
         try (EntityManager em = HibernateUtil.getEntityManager();) {
-            TypedQuery<User> query = em.createQuery("SELECT u FROM User u", User.class);
-            return query.getResultList();
+            TypedQuery<User> query = em.createQuery("SELECT u FROM User u ORDER BY u.name ASC", User.class);
+            query.setFirstResult(page * size);
+            query.setMaxResults(size);
+            List<User> list = query.getResultList();
+
+            TypedQuery<Long> countQuery = em.createQuery("SELECT COUNT(u) FROM User u", Long.class);
+            Long totalElements = countQuery.getSingleResult();
+
+            return new PagedResult<>(list, page, size, totalElements);
         } catch (Exception e) {
             throw new RepositoryException(e);
         }

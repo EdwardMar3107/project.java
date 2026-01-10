@@ -1,0 +1,68 @@
+package by.ezer.mappers;
+
+import by.ezer.dto.OrderDTO;
+import by.ezer.dto.ProductDTO;
+import by.ezer.entity.Order;
+import by.ezer.entity.Product;
+import by.ezer.entity.User;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.processing.Generated;
+import org.mapstruct.factory.Mappers;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-01-10T22:17:37+0300",
+    comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.0.0.jar, environment: Java 25.0.1 (Oracle Corporation)"
+)
+public class OrderMapperImpl implements OrderMapper {
+
+    private final ProductMapper productMapper = Mappers.getMapper( ProductMapper.class );
+
+    @Override
+    public OrderDTO toDto(Order order) {
+        if ( order == null ) {
+            return null;
+        }
+
+        OrderDTO.OrderDTOBuilder orderDTO = OrderDTO.builder();
+
+        orderDTO.userName( orderUserUserName( order ) );
+        orderDTO.userEmail( orderUserEmail( order ) );
+        orderDTO.products( productListToProductDTOList( order.getProducts() ) );
+        orderDTO.id( order.getId() );
+        orderDTO.orderDate( order.getOrderDate() );
+        orderDTO.totalAmount( order.getTotalAmount() );
+
+        return orderDTO.build();
+    }
+
+    private String orderUserUserName(Order order) {
+        User user = order.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getUserName();
+    }
+
+    private String orderUserEmail(Order order) {
+        User user = order.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getEmail();
+    }
+
+    protected List<ProductDTO> productListToProductDTOList(List<Product> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<ProductDTO> list1 = new ArrayList<ProductDTO>( list.size() );
+        for ( Product product : list ) {
+            list1.add( productMapper.toDto( product ) );
+        }
+
+        return list1;
+    }
+}
