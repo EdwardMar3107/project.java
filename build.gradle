@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'by.ezer'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Hibernate ORM 7.2 (включает JPA API)
+    implementation 'org.hibernate.orm:hibernate-core:7.2.0.Final'
+
+    // Явно JPA API (на случай проблем с импортами в IDE)
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+
+    // PostgreSQL драйвер
+    runtimeOnly 'org.postgresql:postgresql:42.7.3'
+
+    // H2 база в памяти — для быстрого тестирования (очень удобно!)
+    runtimeOnly 'com.h2database:h2:2.3.230'
+
+    // Логирование
+    implementation 'org.slf4j:slf4j-simple:2.0.16'  // обновил до свежей
+
+    // Dotenv для .env файлов (если захочешь вынести credentials)
+    implementation 'io.github.cdimascio:dotenv-java:3.0.2'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.40'
+    annotationProcessor 'org.projectlombok:lombok:1.18.40'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+    //MapStruct
+    compileOnly 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    // Тесты
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+application {
+    mainClass = 'by.ezer.Main'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
