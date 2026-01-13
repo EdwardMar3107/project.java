@@ -1,5 +1,9 @@
 package by.ezer.service;
 
+import by.ezer.repositories.api.OrderRepository;
+import by.ezer.repositories.api.ProductRepository;
+import by.ezer.repositories.api.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import by.ezer.dto.OrderDTO;
@@ -11,7 +15,7 @@ import by.ezer.mappers.OrderMapper;
 import by.ezer.repositories.impl.OrderRepositoryImpl;
 import by.ezer.repositories.impl.ProductRepositoryImpl;
 import by.ezer.repositories.impl.UserRepositoryImpl;
-
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,19 +23,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 @RequiredArgsConstructor
 public class OrderService {
 
     //Добавляем Репы, потому что сервисы работают с ними
-    private final OrderRepositoryImpl orderRepository;
-    private final UserRepositoryImpl userRepository;
-    private final ProductRepositoryImpl productRepository;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
     //Маппер для преобразования сущности Order в DTO
     //Выносим маппинг из сервиса для чистоты кода
     private final OrderMapper orderMapper;
 
     //Создаем метод: Создание Заказа
+    @Transactional
     public OrderDTO createOrder(String userEmail, List<Long> productIds) {
 
         //Находим пользователей по почте
@@ -55,13 +61,14 @@ public class OrderService {
 
         //Создаем заказ и добавляем туда заказ
         Order order = new Order(LocalDateTime.now(), totalPrice);
+        order.setProducts(new ArrayList<>());
         for (Product product : products) {
             order.addProduct(product);
         }
         //Привязываем заказ к пользователю
         user.addOrder(order);
         //Сохраняем всё дело
-        userRepository.save(user);
+        orderRepository.save(order);
 
         //Преобразуем всё в DTO, чтобы создать "картинку", используем маппер
         return orderMapper.toDto(order);
@@ -99,6 +106,7 @@ public class OrderService {
                 .toList();
     }
 
+    @Transactional
     public void updateOrder(Long orderId, OrderDTO dto) {
 
         Order order = orderRepository.findById(orderId)
@@ -110,6 +118,7 @@ public class OrderService {
         orderRepository.update(order);
     }
 
+    @Transactional
     public void deleteOrder(Long orderId) {
 
         orderRepository.deleteById(orderId);

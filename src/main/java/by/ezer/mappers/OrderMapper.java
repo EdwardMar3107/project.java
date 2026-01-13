@@ -4,8 +4,9 @@ import by.ezer.dto.OrderDTO;
 import by.ezer.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.context.annotation.ComponentScan;
 
-@Mapper(componentModel = "default", uses = ProductMapper.class)
+@Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface OrderMapper {
 
     @Mapping(target = "userName", source = "user.userName")

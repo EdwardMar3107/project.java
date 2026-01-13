@@ -5,9 +5,8 @@ import by.ezer.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "default")
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(target = "name", source = "productName")
     ProductDTO toDto(Product product);
 }

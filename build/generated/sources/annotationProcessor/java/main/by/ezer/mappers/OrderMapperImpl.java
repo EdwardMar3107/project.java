@@ -8,16 +8,19 @@ import by.ezer.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
-import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-10T22:17:37+0300",
+    date = "2026-01-13T18:35:29+0300",
     comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.0.0.jar, environment: Java 25.0.1 (Oracle Corporation)"
 )
+@Component
 public class OrderMapperImpl implements OrderMapper {
 
-    private final ProductMapper productMapper = Mappers.getMapper( ProductMapper.class );
+    @Autowired
+    private ProductMapper productMapper;
 
     @Override
     public OrderDTO toDto(Order order) {

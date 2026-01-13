@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Accessors(chain = true)
-public record ProductDTO(Long id, String name, BigDecimal price, String description) {
+public record ProductDTO(Long id, String productName, BigDecimal price, String description) {
     //DTO - класс, который нужен для того, чтобы показать содержимое БД - без вмешательства в БД(картинку)
     // ProductDTO — Data Transfer Object
     // Используется для передачи данных о продукте наружу (в Main, API, фронтенд)

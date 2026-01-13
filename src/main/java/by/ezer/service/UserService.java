@@ -5,18 +5,21 @@ import by.ezer.dto.UserDTO;
 import by.ezer.entity.User;
 import by.ezer.mappers.UserMapper;
 import by.ezer.repositories.api.UserRepository;
-import by.ezer.repositories.impl.UserRepositoryImpl;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    @Transactional
     public UserDTO createUser(String userName, int age, String userEmail) {
 
         User user = new User(userName, age, userEmail);
@@ -47,35 +50,33 @@ public class UserService {
     }
 
     public List<UserDTO> findUsersByName(String userName) {
-
         Optional<User> userOpt = userRepository.findByName(userName);
-
-        return userOpt.stream()
-                .map(userMapper::toDto)
-                .toList();
+        return userOpt.map(userMapper::toDto)
+                .map(List::of)  // если нашли — список из одного элемента
+                .orElse(List.of());  // если не нашли — пустой список
     }
 
-    public List<UserDTO> findUsersByEmail(String UserEmail) {
-
-        Optional<User> users = userRepository.findByEmail(UserEmail);
-
-        return users.stream()
-                .map(userMapper::toDto)
-                .toList();
+    public List<UserDTO> findUsersByEmail(String userEmail) {
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        return userOpt.map(userMapper::toDto)
+                .map(List::of)
+                .orElse(List.of());
     }
 
+    @Transactional
     public void updateUser(Long userId, UserDTO userDto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setUserName(userDto.name());
+        user.setUserName(userDto.userName());
         user.setAge(userDto.age());
         user.setEmail(userDto.email());
 
         userRepository.update(user);
     }
 
+    @Transactional
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
