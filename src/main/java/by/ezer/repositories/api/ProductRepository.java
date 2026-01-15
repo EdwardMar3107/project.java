@@ -11,7 +11,6 @@ public interface ProductRepository {
     void save(Product product) throws RepositoryException;
     Optional<Product> findById(Long id) throws RepositoryException;
     PagedResult<Product> findAllPaged(int page, int size) throws RepositoryException;
-    List<Product> findByNameContaining(String namePart) throws RepositoryException;
     void update(Product product) throws RepositoryException;
     void deleteById(Long id) throws RepositoryException;
 }

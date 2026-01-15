@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.springframework:spring-context:7.0.2'
     implementation 'org.springframework:spring-orm:7.0.2' // для JpaTransactionManager
     implementation 'org.springframework:spring-tx:7.0.2' // даёт @EnableTransactionManagement
+    implementation 'org.springframework:spring-webmvc:7.0.2' // MVC
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.40'

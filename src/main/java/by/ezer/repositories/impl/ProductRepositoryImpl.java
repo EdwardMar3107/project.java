@@ -44,14 +44,6 @@ public class ProductRepositoryImpl implements ProductRepository {
         return new PagedResult<>(products, page, size, totalElements);
     }
 
-    //Есть похожее объяснение в UserRepository
-    @Override
-    public List<Product> findByNameContaining(String namePart) {
-        TypedQuery<Product> query = em.createQuery("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(:namePart)", Product.class);
-        query.setParameter("namePart", "%" + namePart.toLowerCase() + "%");
-        return query.getResultList();
-    }
-
     //Пояснение в UserRepository
     @Override
     public void update(Product product) {

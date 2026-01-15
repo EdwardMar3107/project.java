@@ -23,7 +23,6 @@ public class ProductService {
 
     @Transactional
     public ProductDTO createProduct(String productName, BigDecimal price, String description) {
-
         Product product = new Product(productName, price, description);
 
         productRepository.save(product);
@@ -32,7 +31,6 @@ public class ProductService {
     }
 
     public ProductDTO getProductById(Long id) {
-
         Optional<Product> productOpt = productRepository.findById(id);
 
         Product product = productOpt.orElseThrow(() -> new RuntimeException("Product not found"));
@@ -41,7 +39,6 @@ public class ProductService {
     }
 
     public PagedResult<ProductDTO> getAllPaged(int page, int size) {
-
         PagedResult<Product> result = productRepository.findAllPaged(page, size);
 
         List<ProductDTO> dtos = result.getContent().stream()
@@ -51,19 +48,8 @@ public class ProductService {
         return new PagedResult<>(dtos, result.getPage(), result.getSize(), result.getTotalElements());
     }
 
-    public List<ProductDTO> findProductsByName(String namePart) {
-        //Вызываем репозиторий
-        List<Product> products = productRepository.findByNameContaining(namePart);
-
-        //Преобразуем каждый Product в ProductDTO с помощью маппера
-        return products.stream()
-                .map(productMapper::toDto)
-                .toList();
-    }
-
     @Transactional
     public void updateProduct(Long productId, ProductDTO dto) {
-
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 

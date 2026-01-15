@@ -21,7 +21,6 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(String userName, int age, String userEmail) {
-
         User user = new User(userName, age, userEmail);
 
         userRepository.save(user);
@@ -30,7 +29,6 @@ public class UserService {
     }
 
     public UserDTO getUserById(Long id) {
-
         Optional<User> userOpt = userRepository.findById(id);
 
         User user = userOpt.orElseThrow(() -> new RuntimeException("User not found"));
@@ -39,7 +37,6 @@ public class UserService {
     }
 
     public PagedResult<UserDTO> getAllPaged(int page, int size) {
-
         PagedResult<User> result = userRepository.findAllPaged(page, size);
 
         List<UserDTO> dtos = result.getContent().stream()
@@ -49,23 +46,8 @@ public class UserService {
         return new PagedResult<>(dtos, result.getPage(), result.getSize(), result.getTotalElements());
     }
 
-    public List<UserDTO> findUsersByName(String userName) {
-        Optional<User> userOpt = userRepository.findByName(userName);
-        return userOpt.map(userMapper::toDto)
-                .map(List::of)  // если нашли — список из одного элемента
-                .orElse(List.of());  // если не нашли — пустой список
-    }
-
-    public List<UserDTO> findUsersByEmail(String userEmail) {
-        Optional<User> userOpt = userRepository.findByEmail(userEmail);
-        return userOpt.map(userMapper::toDto)
-                .map(List::of)
-                .orElse(List.of());
-    }
-
     @Transactional
     public void updateUser(Long userId, UserDTO userDto) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

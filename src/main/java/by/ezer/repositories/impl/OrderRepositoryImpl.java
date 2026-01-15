@@ -32,14 +32,6 @@ public class OrderRepositoryImpl implements OrderRepository {
         return Optional.ofNullable(order);
     }
 
-    //Есть похожее объяснение в UserRepository
-    @Override
-    public List<Order> findByUserId(Long userId) {
-        TypedQuery<Order> query = em.createQuery("SELECT o FROM Order o WHERE o.user.id = :userId", Order.class);
-        query.setParameter("userId", userId);
-        return query.getResultList();
-    }
-
     //Зачем FETCH JOIN?
     //Без него при обращении к order.getProducts() или order.getUser() вне сессии была бы ошибка LazyInitializationException.
     @Override

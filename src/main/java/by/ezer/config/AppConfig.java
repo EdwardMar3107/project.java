@@ -8,7 +8,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -18,7 +17,7 @@ import java.util.Properties;
 @Configuration
 @ComponentScan(basePackages = "by.ezer")
 @EnableTransactionManagement
-public class SpringConfig {
+public class AppConfig {
 
     @Bean
     public DataSource dataSource() {
@@ -29,7 +28,7 @@ public class SpringConfig {
         ds.setPassword("postgres");
         return ds;
     }
-
+    
     //Создаём EntityManagerFactory
     @Bean
     public EntityManagerFactory entityManagerFactory(DataSource dataSource) {

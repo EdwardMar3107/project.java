@@ -10,7 +10,6 @@ import java.util.Optional;
 public interface OrderRepository {
     void save(Order order) throws RepositoryException;
     Optional<Order> findById(Long id) throws RepositoryException;
-    List<Order> findByUserId(Long userId) throws RepositoryException;
     Optional<Order> findByIdWithDetails(Long id) throws RepositoryException;
     PagedResult<Order> findAllPaged(int page, int size) throws RepositoryException;
     void update(Order order)  throws RepositoryException;

@@ -47,35 +47,6 @@ public class UserRepositoryImpl implements UserRepository {
         return new PagedResult<>(list, page, size, totalElements);
     }
 
-    //Optional чтобы не было null
-    @Override
-    public Optional<User> findByName(String name) {
-        //JPQL запрос: Найди пользователей, у которых поле name равно переданному параметру у объекта
-        TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.userName = :name", User.class);
-        //Устанавливаем значение параметра name
-        query.setParameter("name", name);
-        //Пытаемся получить единственный результат
-        try {
-            //Если пользователь найдеН, то оборачиваем его в Optional
-            return Optional.of(query.getSingleResult());
-        } catch (NoResultException e) {
-            //Если - нет, то возвращаем пустой Optional без ошибки
-            return Optional.empty();
-        }
-    }
-
-    //Пояснение в методу findByName
-    @Override
-    public Optional<User> findByEmail(String email) {
-        TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
-        query.setParameter("email", email);
-        try {
-            return Optional.of(query.getSingleResult());
-        } catch (NoResultException e) {
-            return Optional.empty();
-        }
-    }
-
     @Override
     public void update(User user) {
         //Обновляем пользователя

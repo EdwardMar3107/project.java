@@ -38,12 +38,11 @@ public class OrderService {
 
     //Создаем метод: Создание Заказа
     @Transactional
-    public OrderDTO createOrder(String userEmail, List<Long> productIds) {
-
+    public OrderDTO createOrder(Long id, List<Long> productIds) {
         //Находим пользователей по почте
-            Optional<User> userOpt = userRepository.findByEmail(userEmail);
+            Optional<User> userOpt = userRepository.findById(id);
             //Возвращаем пользователя если таковой имеется, в ином случае исключение
-            User user = userOpt.orElseThrow(() -> new RuntimeException("User not found" + userEmail));
+            User user = userOpt.orElseThrow(() -> new RuntimeException("User not found" + id));
 
             //Создаем переменную, которая будет хранить сумму заказов, а также список продуктов
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -75,7 +74,6 @@ public class OrderService {
     }
 
     public OrderDTO getOrderById(Long id) {
-
         Optional<Order> orderOpt = orderRepository.findByIdWithDetails(id);
         Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
 
@@ -84,7 +82,6 @@ public class OrderService {
     }
 
     public PagedResult<OrderDTO> getAllPaged(int page, int size) {
-
         PagedResult<Order> result = orderRepository.findAllPaged(page, size);
 
         List<OrderDTO> dtos = result.getContent().stream()
@@ -94,21 +91,8 @@ public class OrderService {
         return new PagedResult<>(dtos, result.getPage(), result.getSize(), result.getTotalElements());
     }
 
-    public List<OrderDTO> getOrdersByUserEmail(String userEmail) {
-
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found" + userEmail));
-
-        List<Order> orders = orderRepository.findByUserId(user.getId());
-
-        return orders.stream()
-                .map(orderMapper::toDto)
-                .toList();
-    }
-
     @Transactional
     public void updateOrder(Long orderId, OrderDTO dto) {
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
@@ -120,7 +104,6 @@ public class OrderService {
 
     @Transactional
     public void deleteOrder(Long orderId) {
-
         orderRepository.deleteById(orderId);
     }
 }
