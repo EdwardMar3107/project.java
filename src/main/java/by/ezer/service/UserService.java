@@ -1,6 +1,7 @@
 package by.ezer.service;
 
 import by.ezer.dto.PagedResult;
+import by.ezer.dto.UserCreateDTO;
 import by.ezer.dto.UserDTO;
 import by.ezer.entity.User;
 import by.ezer.mappers.UserMapper;
@@ -20,23 +21,20 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Transactional
-    public UserDTO createUser(String userName, int age, String userEmail) {
-        User user = new User(userName, age, userEmail);
+    public UserDTO createUser(UserCreateDTO request) {
+        User user = new User(request.userName(), request.age(), request.email());
 
         userRepository.save(user);
 
         return userMapper.toDto(user);
     }
 
-    public UserDTO getUserById(Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-
-        User user = userOpt.orElseThrow(() -> new RuntimeException("User not found"));
-
-        return userMapper.toDto(user);
+    public Optional<UserDTO> findById(Long id) {
+        return userRepository.findById(id)
+                .map(userMapper::toDto);
     }
 
-    public PagedResult<UserDTO> getAllPaged(int page, int size) {
+    public PagedResult<UserDTO> findAllPaged(int page, int size) {
         PagedResult<User> result = userRepository.findAllPaged(page, size);
 
         List<UserDTO> dtos = result.getContent().stream()

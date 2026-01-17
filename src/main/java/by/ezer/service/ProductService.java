@@ -1,6 +1,7 @@
 package by.ezer.service;
 
 import by.ezer.dto.PagedResult;
+import by.ezer.dto.ProductCreateDTO;
 import by.ezer.dto.ProductDTO;
 import by.ezer.entity.Product;
 import by.ezer.mappers.ProductMapper;
@@ -22,23 +23,19 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     @Transactional
-    public ProductDTO createProduct(String productName, BigDecimal price, String description) {
-        Product product = new Product(productName, price, description);
+    public ProductDTO createProduct(ProductCreateDTO request) {
+        Product product = new Product(request.productName(), request.price(), request.description());
 
         productRepository.save(product);
 
         return productMapper.toDto(product);
     }
 
-    public ProductDTO getProductById(Long id) {
-        Optional<Product> productOpt = productRepository.findById(id);
-
-        Product product = productOpt.orElseThrow(() -> new RuntimeException("Product not found"));
-
-        return productMapper.toDto(product);
+    public Optional<ProductDTO> findById(Long id) {
+        return productRepository.findById(id).map(productMapper::toDto);
     }
 
-    public PagedResult<ProductDTO> getAllPaged(int page, int size) {
+    public PagedResult<ProductDTO> findAllPaged(int page, int size) {
         PagedResult<Product> result = productRepository.findAllPaged(page, size);
 
         List<ProductDTO> dtos = result.getContent().stream()

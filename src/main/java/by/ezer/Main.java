@@ -8,14 +8,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class Main {
     public static void main(String[] args) {
-
-        try {
-            AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        System.out.println("Server is open: http://localhost:8080/test/hello");
+        context.registerShutdownHook();
     }
 }

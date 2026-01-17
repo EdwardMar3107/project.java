@@ -1,5 +1,6 @@
 package by.ezer.service;
 
+import by.ezer.dto.OrderCreateDTO;
 import by.ezer.repositories.api.OrderRepository;
 import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
@@ -38,18 +39,18 @@ public class OrderService {
 
     //Создаем метод: Создание Заказа
     @Transactional
-    public OrderDTO createOrder(Long id, List<Long> productIds) {
+    public OrderDTO createOrder(OrderCreateDTO request) {
         //Находим пользователей по почте
-            Optional<User> userOpt = userRepository.findById(id);
+            Optional<User> userOpt = userRepository.findById(request.userId());
             //Возвращаем пользователя если таковой имеется, в ином случае исключение
-            User user = userOpt.orElseThrow(() -> new RuntimeException("User not found" + id));
+            User user = userOpt.orElseThrow(() -> new RuntimeException("User not found" + request.userId()));
 
             //Создаем переменную, которая будет хранить сумму заказов, а также список продуктов
         BigDecimal totalPrice = BigDecimal.ZERO;
         List<Product> products = new ArrayList<>();
 
         //С помощью цикла проходимся по заказам и добавляем их в total, в ином случаем - исключение, если их нет
-        for (Long productId : productIds) {
+        for (Long productId : request.productIds()) {
 
             Optional<Product> productOpt = productRepository.findById(productId);
             Product product = productOpt.orElseThrow(() -> new RuntimeException("Product not found"  + productId));
@@ -73,15 +74,15 @@ public class OrderService {
         return orderMapper.toDto(order);
     }
 
-    public OrderDTO getOrderById(Long id) {
+    public Optional<OrderDTO> findById(Long id) {
         Optional<Order> orderOpt = orderRepository.findByIdWithDetails(id);
         Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
 
         //Используем маппер
-        return orderMapper.toDto(order);
+        return orderRepository.findByIdWithDetails(id).map(orderMapper::toDto);
     }
 
-    public PagedResult<OrderDTO> getAllPaged(int page, int size) {
+    public PagedResult<OrderDTO> findAllPaged(int page, int size) {
         PagedResult<Order> result = orderRepository.findAllPaged(page, size);
 
         List<OrderDTO> dtos = result.getContent().stream()
