@@ -6,16 +6,11 @@ import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import by.ezer.dto.OrderDTO;
-import by.ezer.dto.PagedResult;
 import by.ezer.entity.Order;
 import by.ezer.entity.Product;
 import by.ezer.entity.User;
 import by.ezer.mappers.OrderMapper;
-import by.ezer.repositories.impl.OrderRepositoryImpl;
-import by.ezer.repositories.impl.ProductRepositoryImpl;
-import by.ezer.repositories.impl.UserRepositoryImpl;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -74,37 +69,37 @@ public class OrderService {
         return orderMapper.toDto(order);
     }
 
-    public Optional<OrderDTO> findById(Long id) {
-        Optional<Order> orderOpt = orderRepository.findByIdWithDetails(id);
-        Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
-
-        //Используем маппер
-        return orderRepository.findByIdWithDetails(id).map(orderMapper::toDto);
-    }
-
-    public PagedResult<OrderDTO> findAllPaged(int page, int size) {
-        PagedResult<Order> result = orderRepository.findAllPaged(page, size);
-
-        List<OrderDTO> dtos = result.getContent().stream()
-                .map(orderMapper::toDto)
-                .toList();
-
-        return new PagedResult<>(dtos, result.getPage(), result.getSize(), result.getTotalElements());
-    }
-
-    @Transactional
-    public void updateOrder(Long orderId, OrderDTO dto) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
-
-        order.setTotalAmount(dto.totalAmount());
-        order.setOrderDate(dto.orderDate());
-
-        orderRepository.update(order);
-    }
-
-    @Transactional
-    public void deleteOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
-    }
+//    public Optional<OrderDTO> findById(Long id) {
+//        Optional<Order> orderOpt = orderRepository.findById(id);
+//        Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
+//
+//        //Используем маппер
+//        return orderRepository.findById(id).map(orderMapper::toDto);
+//    }
+//
+//    public PagedResult<OrderDTO> findAllPaged(int page, int size) {
+//        PagedResult<Order> result = orderRepository.findAllPaged(page, size);
+//
+//        List<OrderDTO> dtos = result.getContent().stream()
+//                .map(orderMapper::toDto)
+//                .toList();
+//
+//        return new PagedResult<>(dtos, result.getPage(), result.getSize(), result.getTotalElements());
+//    }
+//
+//    @Transactional
+//    public void updateOrder(Long orderId, OrderDTO dto) {
+//        Order order = orderRepository.findById(orderId)
+//                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+//
+//        order.setTotalAmount(dto.totalAmount());
+//        order.setOrderDate(dto.orderDate());
+//
+//        orderRepository.update(order);
+//    }
+//
+//    @Transactional
+//    public void deleteOrder(Long orderId) {
+//        orderRepository.deleteById(orderId);
+//    }
 }

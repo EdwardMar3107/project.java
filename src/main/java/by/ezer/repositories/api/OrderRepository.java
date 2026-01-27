@@ -1,17 +1,10 @@
 package by.ezer.repositories.api;
 
-import by.ezer.dto.PagedResult;
 import by.ezer.entity.Order;
-import by.ezer.exceptions.RepositoryException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
+import java.awt.print.Pageable;
 
-public interface OrderRepository {
-    void save(Order order) throws RepositoryException;
-    Optional<Order> findById(Long id) throws RepositoryException;
-    Optional<Order> findByIdWithDetails(Long id) throws RepositoryException;
-    PagedResult<Order> findAllPaged(int page, int size) throws RepositoryException;
-    void update(Order order)  throws RepositoryException;
-    void deleteById(Long id) throws RepositoryException;
+public interface OrderRepository extends JpaRepository<Order, Long> {
 }

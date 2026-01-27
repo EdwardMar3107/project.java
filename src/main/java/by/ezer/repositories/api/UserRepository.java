@@ -1,16 +1,12 @@
 package by.ezer.repositories.api;
 
-import by.ezer.dto.PagedResult;
 import by.ezer.entity.User;
-import by.ezer.exceptions.RepositoryException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.awt.print.Pageable;
 import java.util.Optional;
 
-public interface UserRepository {
-    void save(User user) throws RepositoryException;
-    Optional<User> findById(Long id) throws RepositoryException;
-    PagedResult<User> findAllPaged(int page, int size) throws RepositoryException;
-    void update(User user) throws RepositoryException;
-    void deleteById(Long id) throws RepositoryException;
+public interface UserRepository extends JpaRepository<User,Long> {
+    Optional<User> findByEmail(String email);
 }

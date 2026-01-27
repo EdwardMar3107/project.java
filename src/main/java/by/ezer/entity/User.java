@@ -27,6 +27,12 @@ public class User {
     private int age;
     @Column(nullable = false, unique = true)
     private String email;
+    @Column(nullable = false)
+    private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
 
     //Связь User и Order
     //mappedBy - означает foreign key - главный
@@ -38,10 +44,12 @@ public class User {
 
     //Учитывая что есть аннотация lombok, всё равно для удобства нужно прописать конструктор
     //id генерируется автоматически с автоинкрементом
-    public User(String userName, int age, String email) {
+    public User(String userName, int age, String email, String password, Role role) {
         this.userName = userName;
         this.age = age;
         this.email = email;
+        this.password = password;
+        this.role = role;
         this.orders = new ArrayList<>();
     }
 

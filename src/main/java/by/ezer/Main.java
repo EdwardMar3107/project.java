@@ -4,12 +4,13 @@ import by.ezer.config.AppConfig;
 import by.ezer.service.OrderService;
 import by.ezer.service.ProductService;
 import by.ezer.service.UserService;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+@SpringBootApplication
 public class Main {
-    public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        System.out.println("Server is open: http://localhost:8080/test/hello");
-        context.registerShutdownHook();
+    static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
     }
 }
