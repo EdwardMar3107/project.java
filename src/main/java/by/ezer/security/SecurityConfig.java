@@ -22,72 +22,71 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtFilter;
-    private final CustomUserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtFilter; //кастомный фильтр JWT
+    private final CustomUserDetailsService userDetailsService; // сервис загрузки пользователей из БД
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http)
+    @Bean  // Spring: создать объект и управлять им
+    public SecurityFilterChain filterChain(HttpSecurity http) // HttpSecurity — объект-конфигуратор всей security логики
             throws Exception {
 
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
+        http // Начинаем fluent-конфигурацию
+                .csrf(AbstractHttpConfigurer::disable) // Отключаем CSRF защиту, JWT + REST API = Stateless.
+                                                       // CSRF нужен только для cookie-based auth.
+                .sessionManagement(session ->  // Настройка управления сессиями
+                        session.sessionCreationPolicy(  // НЕ создавать HttpSession, НЕ хранить пользователя на сервере, Только JWT
                                 SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth  // Начинаем описывать: "Кто куда может ходить"
 
                         // AUTH
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll() //Разрешаем всем login, register без токена
 
                         // PRODUCTS
-                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/products/**")
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll() // Просмотр товаров доступен всем (публичный API).
+                        .requestMatchers(HttpMethod.POST, "/products/**") // Создавать товары может ТОЛЬКО ADMIN.
                         .hasRole("ADMIN")
 
                         // ORDERS
-                        .requestMatchers("/orders/**")
+                        .requestMatchers("/orders/**") // Работать с заказами может только залогиненный USER.
                         .hasRole("USER")
 
                         // USERS
-                        .requestMatchers("/users/**")
+                        .requestMatchers("/users/**")  // Управление пользователями — только ADMIN.
                         .hasRole("ADMIN")
 
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // Всё остальное Требует аутентификации
                 )
 
-                .authenticationProvider(authenticationProvider())
-
-                .addFilterBefore(jwtFilter,
+                .authenticationProvider(authenticationProvider()) // Подключаем наш provider: берёт UserDetailsService, сравнивает пароль
+                                                                  // Возвращает Authentication
+                .addFilterBefore(jwtFilter, // Вставляем JWT фильтр: JW Filter->Security Context->Controllers
                         UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
+        return http.build(); // Собираем всю конфигурацию в SecurityFilterChain.
     }
 
-    @Bean
+    @Bean // Создаём бин аутентификатора.
     public AuthenticationProvider authenticationProvider() {
 
         DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider(userDetailsService);
+                new DaoAuthenticationProvider(userDetailsService);  // Передаем CustomUserDetailsService. Он будет загружать пользователя из БД.
 
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder()); // Указываем: Как сравнивать пароль: raw password -> BCrypt -> compare
 
-        return provider;
+        return provider; // Возвращаем provider в Spring контейнер.
     }
 
-    @Bean
+    @Bean // Создаём бин кодировщика.
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // Используем BCrypt: salt-> adaptive hashing->production standard
     }
 
-    @Bean
+    @Bean // Получаем готовый AuthenticationManager из Spring.
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config)
             throws Exception {
 
-        return config.getAuthenticationManager();
+        return config.getAuthenticationManager(); // Spring сам собирает: provider, encoder, userDetailsService
     }
-
 }
 

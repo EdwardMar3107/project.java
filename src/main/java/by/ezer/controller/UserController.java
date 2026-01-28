@@ -14,12 +14,12 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
-        return userService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<UserDTO> findById(@PathVariable Long id) {
+//        return userService.findById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
 //    @GetMapping
 //    public ResponseEntity<PagedResult<UserDTO>> findAllPaged (@RequestParam(value = "page", defaultValue = "0") int page,

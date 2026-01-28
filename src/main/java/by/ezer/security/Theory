@@ -1,0 +1,208 @@
+🧬 ПОРЯДОК СОЗДАНИЯ (При старте приложения)
+
+Когда ты запускаешь Spring Boot:
+
+1️⃣ SecurityConfig
+@Configuration
+
+Spring:
+👉 читает настройки безопасности
+👉 строит фильтры
+👉 создаёт SecurityFilterChain
+
+2️⃣ PasswordEncoder
+
+Из SecurityConfig:
+
+@Bean
+public PasswordEncoder passwordEncoder()
+
+Spring:
+👉 создаёт BCryptPasswordEncoder
+👉 кладёт в Context
+
+3️⃣ CustomUserDetailsService
+@Service
+
+Spring:
+👉 создаёт
+👉 внедряет UserRepository
+
+4️⃣ AuthenticationProvider
+
+Из SecurityConfig:
+
+@Bean
+AuthenticationProvider
+
+Spring:
+👉 создаёт DaoAuthenticationProvider
+👉 подключает:
+
+CustomUserDetailsService
+PasswordEncoder
+
+5️⃣ AuthenticationManager
+
+Spring:
+👉 собирает все AuthenticationProvider
+👉 создаёт AuthenticationManager
+
+6️⃣ JwtService
+@Service
+
+Spring:
+👉 создаёт сервис JWT
+
+7️⃣ JwtAuthenticationFilter
+@Component
+
+Spring:
+👉 создаёт фильтр
+👉 внедряет JwtService
+👉 внедряет CustomUserDetailsService
+
+8️⃣ AuthController
+@RestController
+
+Spring:
+👉 создаёт контроллер
+👉 внедряет:
+
+AuthenticationManager
+JwtService
+
+🧠 ТЕПЕРЬ ЧТО ДЕЛАЕТ КАЖДЫЙ КЛАСС
+
+🔐 AuthController
+Что делает:
+
+Он:
+1️⃣ Принимает email + password
+2️⃣ Передаёт их в AuthenticationManager
+3️⃣ Получает результат
+4️⃣ Генерирует JWT
+5️⃣ Возвращает токен
+
+Он НЕ:
+❌ не ходит в БД
+❌ не проверяет пароль
+❌ не знает про BCrypt
+
+⚙ AuthenticationManager (Spring)
+Что делает:
+
+Он:
+1️⃣ Принимает username + password
+2️⃣ Передаёт в AuthenticationProvider
+3️⃣ Получает Authentication
+
+🧩 DaoAuthenticationProvider
+Что делает:
+
+Он:
+1️⃣ Вызывает CustomUserDetailsService
+2️⃣ Загружает пользователя
+3️⃣ Берёт PasswordEncoder
+4️⃣ Сравнивает пароли
+5️⃣ Проверяет что аккаунт активен
+6️⃣ Возвращает Authentication
+
+🗄 CustomUserDetailsService
+Что делает:
+
+Он:
+1️⃣ Получает email
+2️⃣ Идёт в БД
+3️⃣ Загружает User
+4️⃣ Преобразует Entity → Security User
+5️⃣ Отдаёт Spring Security
+
+🔐 PasswordEncoder (BCrypt)
+Что делает:
+
+Он:
+1️⃣ Берёт пароль из запроса
+2️⃣ Берёт хэш из БД
+3️⃣ Сравнивает их
+4️⃣ Возвращает true / false
+
+🎫 JwtService
+Что делает:
+
+Он:
+1️⃣ Получает UserDetails
+2️⃣ Берёт email
+3️⃣ Создаёт JWT payload
+4️⃣ Подписывает токен секретным ключом
+5️⃣ Возвращает строку
+
+При проверке:
+
+Он:
+1️⃣ Читает токен
+2️⃣ Проверяет подпись
+3️⃣ Проверяет срок жизни
+4️⃣ Извлекает email
+
+🛡 JwtAuthenticationFilter
+Что делает:
+
+Он:
+1️⃣ Перехватывает каждый HTTP запрос
+2️⃣ Берёт Authorization header
+3️⃣ Проверяет Bearer токен
+4️⃣ Извлекает email
+5️⃣ Загружает пользователя
+6️⃣ Проверяет токен
+7️⃣ Кладёт Authentication в SecurityContext
+
+🧠 SecurityContextHolder
+Что делает:
+
+Он:
+1️⃣ Хранит текущего пользователя
+2️⃣ Доступен из любого места приложения
+
+Например:
+
+SecurityContextHolder.getContext().getAuthentication()
+
+🔁 ПОЛНЫЙ ПОТОК ЛОГИНА
+POST /auth/login
+AuthController
+↓
+AuthenticationManager
+↓
+DaoAuthenticationProvider
+↓
+CustomUserDetailsService
+↓
+Database
+↓
+PasswordEncoder
+↓
+Authentication
+↓
+JwtService
+↓
+Response(token)
+
+🔁 ПОТОК ЗАПРОСОВ С JWT
+GET /orders
+JwtAuthenticationFilter
+↓
+JwtService
+↓
+CustomUserDetailsService
+↓
+SecurityContextHolder
+↓
+Controller
+
+⚠ Почему два раза UserDetailsService?
+
+Потому что:
+Момент	         Для чего
+login	         проверить пароль
+JWT request	     восстановить пользователя

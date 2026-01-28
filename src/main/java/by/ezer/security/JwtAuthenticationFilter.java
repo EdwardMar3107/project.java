@@ -15,55 +15,70 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+// Перехватывает каждый запрос, проверяет JWT, логинит пользователя
+public class JwtAuthenticationFilter extends OncePerRequestFilter { // Фильтр выполнится 1 раз на запрос.
 
-    private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+
+    private final JwtService jwtService; // // Сервис для: парсинга токена, проверки подписиизвлечения username
+    private final CustomUserDetailsService userDetailsService; // Получения пользователя из БД по email
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal( // Spring вызывает ЭТОТ метод: На каждый HTTP запрос.
+            HttpServletRequest request,  // Входящий HTTP запрос: headers, body, url
+            HttpServletResponse response, // HTTP ответ.
+            FilterChain filterChain) // Цепочка фильтров.
             throws ServletException, IOException {
 
         String authHeader =
-                request.getHeader("Authorization");
+                request.getHeader("Authorization"); // Читаем Authorization header. Достаём:  Authorization: Bearer eyJhbGci...
 
-        if (authHeader == null ||
-                !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || // Проверка есть ли токен: Если заголовка нет
+                !authHeader.startsWith("Bearer ")) { // Или не начинается с:
 
-            filterChain.doFilter(request, response);
-            return;
+            filterChain.doFilter(request, response); // Передаём запрос дальше: Без логина пользователя.
+            return; // Останавливаем выполнение фильтра.
         }
 
+        // Обрезаем Bearer: Было: Bearer eyJhbGci... Стало: eyJhbGci...
         String token = authHeader.substring(7);
         String username =
-                jwtService.extractUsername(token);
+                jwtService.extractUsername(token); // Достаём username из JWT. JWT внутри содержит: subject = email
 
-        if (username != null &&
-                SecurityContextHolder.getContext()
+        if (username != null && // Если username успешно извлечён
+                SecurityContextHolder.getContext() // И если пользователь ЕЩЁ НЕ залогинен в этом запросе
                         .getAuthentication() == null) {
 
-            UserDetails userDetails =
+            UserDetails userDetails =  // Загружаем пользователя из БД
                     userDetailsService
-                            .loadUserByUsername(username);
+                            .loadUserByUsername(username);  // По email ищем пользователя в БД.
 
-            if (jwtService.isTokenValid(token, userDetails)) {
+            if (jwtService.isTokenValid(token, userDetails)) { // Проверяет: подпись, срок действия, соответствие username
 
-                UsernamePasswordAuthenticationToken authToken =
+                // Создаём Authentication объект
+                UsernamePasswordAuthenticationToken authToken = // Создаём объект"Этот пользователь авторизован"
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
+                                userDetails, // Кладём пользователя
+                                null, // Пароль НЕ нужен (JWT уже проверен)
+                                userDetails.getAuthorities() // Роли пользователя
                         );
 
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authToken);
+                // Сохраняем пользователя в SecurityContext
+                SecurityContextHolder.getContext() // Теперь Spring считает: Пользователь ЗАЛОГИНЕН И: @PreAuthorize работает, hasRole работает,
+                        .setAuthentication(authToken); // Controller знает user
             }
         }
-
-        filterChain.doFilter(request, response);
+        // Передаём запрос дальше
+        filterChain.doFilter(request, response); // Отдаём запрос: Controller, другим фильтрам
     }
 }
+
+//JwtAuthenticationFilter:
+//
+//Каждый запрос:
+//
+//1️⃣ Проверяет JWT
+//2️⃣ Валидирует токен
+//3️⃣ Загружает пользователя
+//4️⃣ Логинит в SecurityContext
+//5️⃣ Пропускает дальше
 
