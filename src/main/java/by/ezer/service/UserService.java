@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -25,7 +23,7 @@ public class UserService {
     public UserDTO createUser(UserCreateDTO request) {
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        User user = new User(request.userName(), request.age(), request.email(), encodedPassword, Role.USER);
+        User user = new User(request.userName(), request.age(), request.email(), encodedPassword);
 
         userRepository.save(user);
 

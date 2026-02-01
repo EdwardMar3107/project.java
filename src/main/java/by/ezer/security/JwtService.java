@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +15,11 @@ import java.util.Date;
 @Service // Spring создаёт singleton сервис.
 public class JwtService {
 
-    private final String SECRET_KEY =
-            "VERY_SECRET_KEY_123456789"; // Секретный ключ для подписи JWT. В реальном проекте — в env variable.
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
 
-    private final long EXPIRATION =
-            1000 * 60 * 60 * 24; // Время жизни токена: 24 часа
+    @Value("${application.security.jwt.expiration}")
+    private Long expiration;
 
     // Генерация токена. Метод создаёт JWT.
     public String generateToken(UserDetails userDetails) {
@@ -27,7 +28,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername()) // Subject = email пользователя.
                 .setIssuedAt(new Date())  // Дата создания.
                 .setExpiration(
-                        new Date(System.currentTimeMillis() + EXPIRATION) // Когда токен истечёт.
+                        new Date(System.currentTimeMillis() + expiration) // Когда токен истечёт.
                 )
                 .signWith(getSignKey(), SignatureAlgorithm.HS256) // Подписываем токен: HMAC + SHA256.
                 .compact(); // Генерируем строку JWT.
@@ -73,7 +74,7 @@ public class JwtService {
     private Key getSignKey() {
 
         byte[] keyBytes =
-                Decoders.BASE64.decode(SECRET_KEY); // JWT библиотека требует: бинарный ключ (byte[]), не строку
+                Decoders.BASE64.decode(secretKey); // JWT библиотека требует: бинарный ключ (byte[]), не строку
         // Это нужно потому что: HMAC работает ТОЛЬКО с байтами.
         // HMAC (Hash-based Message Authentication Code) - Способ подписывать данные секретным ключом, чтобы можно было проверить:
         // что данные НЕ изменились, что их подписал тот, кто знает секрет
