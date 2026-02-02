@@ -14,12 +14,12 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> findById(@PathVariable long id) {
-        return  productService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ProductDTO> findById(@PathVariable long id) {
+//        return  productService.findById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
 //    @GetMapping("/")
 //    public ResponseEntity<PagedResult<ProductDTO>> findAllPaged(@RequestParam(value = "page", defaultValue = "0") int page,
