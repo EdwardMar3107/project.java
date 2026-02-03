@@ -40,4 +40,8 @@ public class Role {
             inverseJoinColumns = {@JoinColumn(name = "authority_id")}
     )
     private Set<Authority> authorities = new HashSet<>();
+
+    public Role(String name) {
+        this.name = name;
+    }
 }

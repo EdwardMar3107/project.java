@@ -31,4 +31,8 @@ public class Authority {
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> roles = new HashSet<>();
+
+    public Authority(String name) {
+        this.name = name;
+    }
 }
