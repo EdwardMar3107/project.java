@@ -30,10 +30,11 @@ public class User implements UserDetails {
     private int age;
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(name = "login")
-    private String login;
     @Column(nullable = false)
     private String password;
+
+    public User(String userName, int age, String email, String encodedPassword) {
+    }
 
     //Связь User и Order
     //mappedBy - означает foreign key - главный
@@ -58,6 +59,14 @@ public class User implements UserDetails {
         order.setUser(null);
     }
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JoinTable(
+            name = "user_role_links",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")}
+    )
     private Set<Role> roles = new HashSet<>();
 
     @Override
@@ -70,7 +79,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return login;
+        return email;
     }
 
     @Override

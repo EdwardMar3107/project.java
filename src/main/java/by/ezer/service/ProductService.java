@@ -3,10 +3,12 @@ package by.ezer.service;
 import by.ezer.dto.ProductCreateDTO;
 import by.ezer.dto.ProductDTO;
 import by.ezer.entity.Product;
+import by.ezer.exceptions.ServiceException;
 import by.ezer.mappers.ProductMapper;
 import by.ezer.repositories.api.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +23,15 @@ public class ProductService {
 
     @Transactional
     public ProductDTO createProduct(ProductCreateDTO request) {
-        Product product = new Product(request.productName(), request.price(), request.description());
+        try {
+            Product product = new Product(request.productName(), request.price(), request.description());
 
-        productRepository.save(product);
+            productRepository.save(product);
 
-        return productMapper.toDto(product);
+            return productMapper.toDto(product);
+        } catch (Exception e) {
+            throw new ServiceException("Cannot save product in service", HttpStatus.BAD_REQUEST);
+        }
     }
 
 //    public Optional<ProductDTO> findById(Long id) {

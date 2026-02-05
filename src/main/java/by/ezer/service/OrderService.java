@@ -1,6 +1,7 @@
 package by.ezer.service;
 
 import by.ezer.dto.OrderCreateDTO;
+import by.ezer.exceptions.ServiceException;
 import by.ezer.repositories.api.OrderRepository;
 import by.ezer.repositories.api.ProductRepository;
 import by.ezer.repositories.api.UserRepository;
@@ -11,6 +12,7 @@ import by.ezer.entity.Order;
 import by.ezer.entity.Product;
 import by.ezer.entity.User;
 import by.ezer.mappers.OrderMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,38 +37,42 @@ public class OrderService {
     //Создаем метод: Создание Заказа
     @Transactional
     public OrderDTO createOrder(OrderCreateDTO request) {
-        //Находим пользователей по почте
+        try {
+            //Находим пользователей по почте
             Optional<User> userOpt = userRepository.findById(request.userId());
             //Возвращаем пользователя если таковой имеется, в ином случае исключение
             User user = userOpt.orElseThrow(() -> new RuntimeException("User not found" + request.userId()));
 
             //Создаем переменную, которая будет хранить сумму заказов, а также список продуктов
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        List<Product> products = new ArrayList<>();
+            BigDecimal totalPrice = BigDecimal.ZERO;
+            List<Product> products = new ArrayList<>();
 
-        //С помощью цикла проходимся по заказам и добавляем их в total, в ином случаем - исключение, если их нет
-        for (Long productId : request.productIds()) {
+            //С помощью цикла проходимся по заказам и добавляем их в total, в ином случаем - исключение, если их нет
+            for (Long productId : request.productIds()) {
 
-            Optional<Product> productOpt = productRepository.findById(productId);
-            Product product = productOpt.orElseThrow(() -> new RuntimeException("Product not found"  + productId));
+                Optional<Product> productOpt = productRepository.findById(productId);
+                Product product = productOpt.orElseThrow(() -> new RuntimeException("Product not found"  + productId));
 
-            products.add(product);
-            totalPrice = totalPrice.add(product.getPrice());
+                products.add(product);
+                totalPrice = totalPrice.add(product.getPrice());
+            }
+
+            //Создаем заказ и добавляем туда заказ
+            Order order = new Order(LocalDateTime.now(), totalPrice);
+            order.setProducts(new ArrayList<>());
+            for (Product product : products) {
+                order.addProduct(product);
+            }
+            //Привязываем заказ к пользователю
+            user.addOrder(order);
+            //Сохраняем всё дело
+            orderRepository.save(order);
+
+            //Преобразуем всё в DTO, чтобы создать "картинку", используем маппер
+            return orderMapper.toDto(order);
+        } catch (RuntimeException e) {
+            throw new ServiceException("Cannot save order in service", HttpStatus.BAD_REQUEST);
         }
-
-        //Создаем заказ и добавляем туда заказ
-        Order order = new Order(LocalDateTime.now(), totalPrice);
-        order.setProducts(new ArrayList<>());
-        for (Product product : products) {
-            order.addProduct(product);
-        }
-        //Привязываем заказ к пользователю
-        user.addOrder(order);
-        //Сохраняем всё дело
-        orderRepository.save(order);
-
-        //Преобразуем всё в DTO, чтобы создать "картинку", используем маппер
-        return orderMapper.toDto(order);
     }
 
 //    public Optional<OrderDTO> findById(Long id) {

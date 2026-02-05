@@ -6,11 +6,11 @@ import by.ezer.dto.RoleCreateDTO;
 import by.ezer.dto.RoleDTO;
 import by.ezer.entity.Product;
 import by.ezer.entity.Role;
+import by.ezer.exceptions.ServiceException;
 import by.ezer.mappers.RoleMapper;
 import by.ezer.repositories.api.RoleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +25,14 @@ public class RoleService {
 
     @Transactional
     public RoleDTO createRole(RoleCreateDTO request) {
-        Role role = new Role(request.name());
+        try {
+            Role role = new Role(request.name());
 
-        roleRepository.save(role);
+            roleRepository.save(role);
 
-        return roleMapper.toDto(role);
+            return roleMapper.toDto(role);
+        } catch (Exception e) {
+            throw new ServiceException("Cannot save role in service", HttpStatus.BAD_REQUEST);
+        }
     }
 }

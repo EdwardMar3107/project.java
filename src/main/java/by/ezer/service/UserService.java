@@ -4,10 +4,12 @@ import by.ezer.dto.UserCreateDTO;
 import by.ezer.dto.UserDTO;
 import by.ezer.entity.Role;
 import by.ezer.entity.User;
+import by.ezer.exceptions.ServiceException;
 import by.ezer.mappers.UserMapper;
 import by.ezer.repositories.api.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +23,18 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserCreateDTO request) {
-        String encodedPassword = passwordEncoder.encode(request.password());
+        try {
+            String encodedPassword = passwordEncoder.encode(request.password());
 
-        User user = new User(request.userName(), request.age(), request.email(), encodedPassword);
+            User user = new User(request.userName(), request.age(), request.email(), encodedPassword);
 
-        userRepository.save(user);
+            userRepository.save(user);
 
-        return userMapper.toDto(user);
+            return userMapper.toDto(user);
+
+        } catch (Exception e) {
+            throw new ServiceException("Cannot save user in service", HttpStatus.BAD_REQUEST);
+        }
     }
 
 //    public Optional<UserDTO> findById(Long id) {
