@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LoggingAspect {
 
-    @Pointcut("@annotation(by.ezer.aspect.annotation.Loggable)")
+    @Pointcut("hasLoggableOnClass() && @annotation(by.ezer.aspect.annotation.Loggable)")
     public void hasLoggableOnMethod() {
     }
 
@@ -27,16 +27,19 @@ public class LoggingAspect {
     @Around("hasLoggableOnMethod() || hasLoggableOnClass()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
 
+        // Запоминаем время начала выполнения метода
         long start = System.currentTimeMillis();
 
+        // Получаем имя класса (OrderService, ProductService и т.д.)
         String className = joinPoint.getTarget().getClass().getSimpleName();
 
+        // Получаем имя метода (createOrder, findById и т.д.)
         String methodName = joinPoint.getSignature().getName();
 
         // Аргументы, с которыми вызвали метод
         Object[] args = joinPoint.getArgs();
 
-        // Лог ДО вызова метода
+        // Лог ДО вызова метода. BEFORE
         log.info(
                 "[LOG] --> {}.{}({})",
                 className,
@@ -52,7 +55,7 @@ public class LoggingAspect {
             // Считаем сколько миллисекунд выполнялся метод
             long duration = System.currentTimeMillis() - start;
 
-            // Лог ПОСЛЕ успешного выполнения
+            // Лог ПОСЛЕ успешного выполнения. AfterReturning
             log.info(
                     "[LOG] <-- {}.{}() returned {} | {}ms",
                     className,
@@ -69,7 +72,7 @@ public class LoggingAspect {
             // Если метод выбросил ошибку
             long duration = System.currentTimeMillis() - start;
 
-            // Лог ошибки
+            // Лог ошибки. AfterThrowing
             log.error(
                     "[LOG] <x> {}.{}() threw {}: \"{}\" | {}ms",
                     className,
