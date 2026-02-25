@@ -24,7 +24,7 @@ public class EmailConsumer {
             mail.setTo(message.getTo());
             mail.setSubject(message.getSubject());
             mail.setText(message.getText());
-            mail.setFrom("your-email@gmail.com");
+            mail.setFrom("pakachun48@gmail.com");
 
             javaMailSender.send(mail);
 

@@ -7,8 +7,8 @@ spring:
   mail: # если используешь встроенный JavaMailSender
     host: smtp.gmail.com
     port: 587
-    username: your-email@gmail.com
-    password: your-app-password
+    username: pakachun48@gmail.com
+    password: izju osky crve hzev
     properties:
       mail:
         smtp:
