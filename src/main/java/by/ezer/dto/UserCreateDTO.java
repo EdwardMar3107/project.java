@@ -1,4 +1,4 @@
 package by.ezer.dto;
 
-public record UserCreateDTO(String userName, int age, String email, String password) {
+public record UserCreateDTO(String name, int age, String email, String password) {
 }

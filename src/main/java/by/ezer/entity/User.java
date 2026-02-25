@@ -18,14 +18,13 @@ import java.util.stream.Collectors;
 //exclude нужен, чтобы избежать рекурсии и LazyInitializationException при печати
 //Рекурсия в Java — это приём программирования, при котором метод вызывает сам себя для решения задачи.
 //Рекурсивные решения особенно удобны в случаях, когда задачу можно разбить на несколько однотипных подзадач меньшего размера.
-@ToString(exclude = "orders")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "user_name", nullable = false, unique = true)
-    private String userName;
+    private String name;
     @Column(nullable = false)
     private int age;
     @Column(nullable = false, unique = true)
@@ -33,7 +32,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    public User(String userName, int age, String email, String encodedPassword) {
+    public User(String name, int age, String email, String encodedPassword) {
+        this.name = name;
+        this.age = age;
+        this.email = email;
+        this.password = encodedPassword;
     }
 
     //Связь User и Order
@@ -42,6 +45,7 @@ public class User implements UserDetails {
     //Cascade - для взаимосвязи, если действие произошло с одной сущностью, значит автоматом и с другой
     //orphanRemoval - если заказ удалили у пользователя, значит удалится из БД
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     List<Order> orders = new ArrayList<>();
 
     //Метод, который позволяет создать связь

@@ -1,5 +1,7 @@
 package by.ezer.service;
 
+import by.ezer.aspect.annotation.Cacheable;
+import by.ezer.aspect.annotation.Loggable;
 import by.ezer.dto.UserCreateDTO;
 import by.ezer.dto.UserDTO;
 import by.ezer.entity.Role;
@@ -9,12 +11,16 @@ import by.ezer.mappers.UserMapper;
 import by.ezer.repositories.api.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
+@Cacheable
 public class UserService {
 
     private final UserRepository userRepository;
@@ -22,11 +28,12 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
+    @Loggable
     public UserDTO createUser(UserCreateDTO request) {
         try {
             String encodedPassword = passwordEncoder.encode(request.password());
 
-            User user = new User(request.userName(), request.age(), request.email(), encodedPassword);
+            User user = new User(request.name(), request.age(), request.email(), encodedPassword);
 
             userRepository.save(user);
 
@@ -37,10 +44,11 @@ public class UserService {
         }
     }
 
-//    public Optional<UserDTO> findById(Long id) {
-//        return userRepository.findById(id)
-//                .map(userMapper::toDto);
-//    }
+    @Loggable
+    public Optional<UserDTO> findById(Long id) {
+        return userRepository.findById(id)
+                .map(userMapper::toDto);
+    }
 //
 //    public PagedResult<UserDTO> findAllPaged(int page, int size) {
 //        PagedResult<User> result = userRepository.findAllPaged(page, size);
@@ -64,8 +72,9 @@ public class UserService {
 //        //userRepository.update(user);
 //    }
 //
-//    @Transactional
-//    public void deleteUser(Long userId) {
-//        userRepository.deleteById(userId);
-//    }
+    @Transactional
+    @Loggable
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
+    }
 }

@@ -3,12 +3,11 @@ package by.ezer.aspect;
 import by.ezer.aspect.annotation.Cacheable;
 import by.ezer.cache.Cache;
 import by.ezer.cache.impl.LRUCache;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -20,6 +19,11 @@ public class CacheAspect {
     private final Cache cache = new LRUCache(20);
     // Создаём кэш LRU на 20 элементов
     // Кэш живёт внутри аспекта
+
+    @PostConstruct
+    public void init() {
+        log.info("CacheAspect успешно создан и зарегистрирован!");
+    }
 
     @Pointcut("execution(public !void by.ezer.service.*.findById(..))")
     public void findByIdMethod() {
@@ -63,21 +67,22 @@ public class CacheAspect {
             Long id = (Long) joinPoint.getArgs()[0];
             // Берём первый аргумент метода (предполагаем, что это id)
 
+            log.info("CacheAspect: проверка кэша для id = {}", id);
             if (cache.containsKey(id)) {
                 // Если объект уже есть в кэше
-
+                log.info("CacheAspect: HIT! Возвращаем из кэша id = {}", id);
                 return cache.get(id);
                 // Возвращаем значение из кэша
                 // Сам метод findById НЕ вызывается
             } else {
                 // Если в кэше нет
-
+                log.info("CacheAspect: MISS! Вызываем реальный метод для id = {}", id);
                 Object retVal = joinPoint.proceed();
                 // Вызываем реальный метод findById(...)
 
                 cache.put(id, retVal);
                 // Сохраняем результат в кэш
-
+                log.info("CacheAspect: результат сохранён в кэш для id = {}", id);
                 return retVal;
                 // Возвращаем результат
             }

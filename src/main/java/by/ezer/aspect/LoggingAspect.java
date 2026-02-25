@@ -1,6 +1,7 @@
 package by.ezer.aspect;
 
 import by.ezer.aspect.annotation.Loggable;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,15 +17,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class LoggingAspect {
 
-    @Pointcut("hasLoggableOnClass() && @annotation(by.ezer.aspect.annotation.Loggable)")
-    public void hasLoggableOnMethod() {
+    @PostConstruct
+    public void init() {
+        log.info("LoggingAspect успешно создан и зарегистрирован!");
     }
 
-    @Pointcut("@within(by.ezer.aspect.annotation.Loggable)")
-    public void hasLoggableOnClass() {
-    }
+    @Pointcut("@annotation(by.ezer.aspect.annotation.Loggable) || @within(by.ezer.aspect.annotation.Loggable)")
+    public void loggableMethods() {}
 
-    @Around("hasLoggableOnMethod() || hasLoggableOnClass()")
+    @Around("loggableMethods()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
 
         // Запоминаем время начала выполнения метода

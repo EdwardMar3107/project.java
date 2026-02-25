@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(  // Преобразуем User (Entity) → UserDetails (Security)
                 user.getEmail(), // Указываем username для Security:
                 user.getPassword(), // пароль из БД (уже BCrypt)
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())) // Формируем список ролей.
+                user.getAuthorities() // Формируем список ролей.
         );
     }
 }

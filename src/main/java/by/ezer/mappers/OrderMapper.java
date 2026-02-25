@@ -9,8 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface OrderMapper {
 
-    @Mapping(target = "userName", source = "user.userName")
+    @Mapping(target = "userName", source = "user.username")
     @Mapping(target = "userEmail", source = "user.email")
-    @Mapping(target = "products", source = "products")
     OrderDTO toDto(Order order);
 }

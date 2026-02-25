@@ -1,5 +1,7 @@
 package by.ezer.service;
 
+import by.ezer.aspect.annotation.Cacheable;
+import by.ezer.aspect.annotation.Loggable;
 import by.ezer.dto.OrderCreateDTO;
 import by.ezer.exceptions.ServiceException;
 import by.ezer.repositories.api.OrderRepository;
@@ -23,6 +25,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Cacheable
 public class OrderService {
 
     //Добавляем Репы, потому что сервисы работают с ними
@@ -36,6 +39,7 @@ public class OrderService {
 
     //Создаем метод: Создание Заказа
     @Transactional
+    @Loggable
     public OrderDTO createOrder(OrderCreateDTO request) {
         try {
             //Находим пользователей по почте
@@ -75,13 +79,14 @@ public class OrderService {
         }
     }
 
-//    public Optional<OrderDTO> findById(Long id) {
-//        Optional<Order> orderOpt = orderRepository.findById(id);
-//        Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
-//
-//        //Используем маппер
-//        return orderRepository.findById(id).map(orderMapper::toDto);
-//    }
+    @Loggable
+    public Optional<OrderDTO> findById(Long id) {
+        Optional<Order> orderOpt = orderRepository.findById(id);
+        Order order = orderOpt.orElseThrow(() -> new RuntimeException("Order not found" + id));
+
+        //Используем маппер
+        return orderRepository.findById(id).map(orderMapper::toDto);
+    }
 //
 //    public PagedResult<OrderDTO> findAllPaged(int page, int size) {
 //        PagedResult<Order> result = orderRepository.findAllPaged(page, size);

@@ -5,6 +5,9 @@
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/7.0.3/3bcdb4075e17a56b148f69fe0d83a4c0662d9258/spring-web-7.0.3.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/7.0.3/3138ff0ec3618446409193edad30ab5565778ea9/spring-web-7.0.3-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/7.0.3/3138ff0ec3618446409193edad30ab5565778ea9/spring-web-7.0.3-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

@@ -14,12 +14,12 @@ public class OrderController {
 
     private final OrderService orderService;
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<OrderDTO> findById (@PathVariable Long id) {
-//        return orderService.findById(id)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> findById (@PathVariable Long id) {
+        return orderService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 //
 //    @GetMapping ResponseEntity<PagedResult<OrderDTO>> findAllPaged (@RequestParam(value = "page", defaultValue = "0") int page,
 //                                                                    @RequestParam(value = "size", defaultValue = "5") int size) {

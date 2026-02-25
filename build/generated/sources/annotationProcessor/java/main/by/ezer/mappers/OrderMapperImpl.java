@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-27T06:41:53+0300",
+    date = "2026-02-12T03:57:17+0300",
     comments = "version: 1.6.3, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.0.0.jar, environment: Java 25.0.1 (Oracle Corporation)"
 )
 @Component
@@ -30,22 +30,22 @@ public class OrderMapperImpl implements OrderMapper {
 
         OrderDTO.OrderDTOBuilder orderDTO = OrderDTO.builder();
 
-        orderDTO.userName( orderUserUserName( order ) );
+        orderDTO.userName( orderUserUsername( order ) );
         orderDTO.userEmail( orderUserEmail( order ) );
-        orderDTO.products( productListToProductDTOList( order.getProducts() ) );
         orderDTO.id( order.getId() );
         orderDTO.orderDate( order.getOrderDate() );
         orderDTO.totalAmount( order.getTotalAmount() );
+        orderDTO.products( productListToProductDTOList( order.getProducts() ) );
 
         return orderDTO.build();
     }
 
-    private String orderUserUserName(Order order) {
+    private String orderUserUsername(Order order) {
         User user = order.getUser();
         if ( user == null ) {
             return null;
         }
-        return user.getUserName();
+        return user.getUsername();
     }
 
     private String orderUserEmail(Order order) {
