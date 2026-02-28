@@ -2,13 +2,13 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
+    username: admin
+    password: admin
   mail: # если используешь встроенный JavaMailSender
     host: smtp.gmail.com
     port: 587
     username: pakachun48@gmail.com
-    password: izju osky crve hzev
+    password: aoek pwrm esii pqtm
     properties:
       mail:
         smtp:

@@ -17,7 +17,7 @@ public class EmailTestService {
         message.setFrom("pakachun48@gmail.com");           // ← должен совпадать с username выше
         message.setTo("pakachun48@gmail.com");             // ← куда отправить (можно себе)
         message.setSubject("Тестовое письмо из Java");
-        message.setText("Привет, Езер, надеюсь ты устроишься работать, бездарь");
+        message.setText("Hello Eduard");
 
         mailSender.send(message);
 
