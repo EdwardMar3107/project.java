@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Loggable
 @Slf4j
-public class EmailProducer {
+public class ProducerService {
 
     private final RabbitTemplate rabbitTemplate;
 

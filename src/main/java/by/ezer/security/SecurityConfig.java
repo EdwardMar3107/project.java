@@ -48,6 +48,8 @@ public class SecurityConfig {
                         // ORDERS
                         .requestMatchers("/orders/**").permitAll() // Работать с заказами может только залогиненный USER.
 
+                        .requestMatchers("/send").permitAll()
+
                         // USERS
                         .requestMatchers("/users/**").permitAll()  // Управление пользователями — только ADMIN.
 
