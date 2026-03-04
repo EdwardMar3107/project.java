@@ -1,0 +1,253 @@
+🧬 ПОРЯДОК СОЗДАНИЯ (При старте приложения)
+
+Когда ты запускаешь Spring Boot:
+
+1️⃣ SecurityConfig
+@Configuration
+
+Spring:
+👉 читает настройки безопасности
+👉 строит фильтры
+👉 создаёт SecurityFilterChain
+SecurityFilterChain — это настройка того, какие запросы в твоём приложении защищать и какими фильтрами Spring Security их обрабатывать.
+На пальцах
+Представь охрану на входе в здание.
+У тебя есть:
+Двери/входы — это URL-ы (например, /login, /api/**, /admin/**).
+Охранники и рамки — это фильтры Spring Security: проверка токена, логин/пароль, CSRF, роли и т.д.
+Правила, кто куда пускается и через какие проверки — это и есть SecurityFilterChain.
+
+2️⃣ PasswordEncoder
+
+Из SecurityConfig:
+
+@Bean
+public PasswordEncoder passwordEncoder()
+
+Spring:
+👉 создаёт BCryptPasswordEncoder
+BCryptPasswordEncoder — это «умная коробочка» в Spring Security, которая превращает обычный пароль в безопасный хэш и потом умеет его проверять.
+По‑простому
+Когда пользователь регистрируется, ты не хранишь его пароль как есть.
+Ты делаешь:
+java
+BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+String hash = encoder.encode("мойПароль");
+В базу уходит не сам пароль, а длинная непонятная строка (hash).
+При логине ты не «раскодируешь» пароль, а берёшь введённый пароль и спрашиваешь у энкодера:
+👉 кладёт в Context
+
+3️⃣ CustomUserDetailsService
+@Service
+
+Spring:
+👉 создаёт
+👉 внедряет UserRepository
+
+4️⃣ AuthenticationProvider
+
+Из SecurityConfig:
+
+@Bean
+AuthenticationProvider
+
+Spring:
+👉 создаёт DaoAuthenticationProvider
+DaoAuthenticationProvider — это «работник», который в Spring Security проверяет логин и пароль пользователя через базу данных.
+По‑простому
+Когда пользователь жмёт «Войти» и отправляет username и password:
+Фильтр Spring Security берёт эти данные и передаёт их на проверку в AuthenticationManager.
+AuthenticationManager передаёт их дальше в DaoAuthenticationProvider.
+DaoAuthenticationProvider делает три вещи:
+Через твой UserDetailsService находит пользователя в базе по логину.
+Берёт сохранённый в базе хэш пароля и сравнивает его с введённым паролем через PasswordEncoder (обычно BCryptPasswordEncoder).
+Если всё ок — создаёт объект аутентифицированного пользователя и говорит: «Да, этого можно пускать».
+👉 подключает:
+CustomUserDetailsService
+PasswordEncoder
+
+5️⃣ AuthenticationManager
+
+Spring:
+👉 собирает все AuthenticationProvider
+AuthenticationProvider — это «проверяющий», который решает, можно ли считать пользователя вошедшим в систему.
+По‑простому
+Когда приходит запрос на логин (логин+пароль, JWT‑токен и т.п.):
+Spring Security упаковывает эти данные в объект Authentication и отправляет его на проверку.
+AuthenticationProvider смотрит на этот объект и решает:
+умею ли я такой тип аутентификации проверять;
+если умею — проверяет (пароль, токен, LDAP и т.д.);
+при успехе возвращает новый Authentication уже с флагом authenticated = true и ролями пользователя.
+AuthenticationManager может иметь несколько разных AuthenticationProvider: один работает с логином/паролем (DaoAuthenticationProvider), другой — с JWT, третий — с LDAP и т.п.
+Если коротко: AuthenticationProvider — это стратегия проверки учётки, конкретный «модуль», который знает, КАК именно удостовериться, что пользователь настоящий.
+👉 создаёт AuthenticationManager
+AuthenticationManager — это «начальник проверяющих» в Spring Security.
+По‑простому
+Когда пользователь присылает логин/пароль (или токен), фильтр безопасности упаковывает это в объект Authentication и отправляет в AuthenticationManager.
+AuthenticationManager не проверяет сам, он перебирает доступные AuthenticationProvider (БД, JWT, LDAP и т.д.) и спрашивает у того, кто умеет: «Проверь этого пользователя».
+Провайдер либо подтверждает пользователя (возвращает Authentication с authenticated = true и ролями), либо выбрасывает ошибку.
+Если коротко: AuthenticationProvider — тот, кто проверяет, а AuthenticationManager — тот, кто выбирает нужного проверяющего и запускает процесс аутентификации.
+
+6️⃣ JwtService
+@Service
+JWT Service: терминология и назначение
+📌 Простыми словами:
+JWT Service — это как "фабрика пропусков и детектор подделок":
+Создает пропуска (токены) для легальных пользователей
+Проверяет пропуска у всех входящих
+Читает информацию с пропуска (кто ты, какие права)
+Spring:
+👉 создаёт сервис JWT
+
+7️⃣ JwtAuthenticationFilter
+@Component
+
+Spring:
+👉 создаёт фильтр
+👉 внедряет JwtService
+👉 внедряет CustomUserDetailsService
+
+8️⃣ AuthController
+@RestController
+
+Spring:
+👉 создаёт контроллер
+👉 внедряет:
+
+AuthenticationManager
+JwtService
+
+🧠 ТЕПЕРЬ ЧТО ДЕЛАЕТ КАЖДЫЙ КЛАСС
+
+🔐 AuthController
+Что делает:
+
+Он:
+1️⃣ Принимает email + password
+2️⃣ Передаёт их в AuthenticationManager
+3️⃣ Получает результат
+4️⃣ Генерирует JWT
+5️⃣ Возвращает токен
+
+Он НЕ:
+❌ не ходит в БД
+❌ не проверяет пароль
+❌ не знает про BCrypt
+
+⚙ AuthenticationManager (Spring)
+Что делает:
+
+Он:
+1️⃣ Принимает username + password
+2️⃣ Передаёт в AuthenticationProvider
+3️⃣ Получает Authentication
+
+🧩 DaoAuthenticationProvider
+Что делает:
+
+Он:
+1️⃣ Вызывает CustomUserDetailsService
+2️⃣ Загружает пользователя
+3️⃣ Берёт PasswordEncoder
+4️⃣ Сравнивает пароли
+5️⃣ Проверяет что аккаунт активен
+6️⃣ Возвращает Authentication
+
+🗄 CustomUserDetailsService
+Что делает:
+
+Он:
+1️⃣ Получает email
+2️⃣ Идёт в БД
+3️⃣ Загружает User
+4️⃣ Преобразует Entity → Security User
+5️⃣ Отдаёт Spring Security
+
+🔐 PasswordEncoder (BCrypt)
+Что делает:
+
+Он:
+1️⃣ Берёт пароль из запроса
+2️⃣ Берёт хэш из БД
+3️⃣ Сравнивает их
+4️⃣ Возвращает true / false
+
+🎫 JwtService
+Что делает:
+
+Он:
+1️⃣ Получает UserDetails
+2️⃣ Берёт email
+3️⃣ Создаёт JWT payload
+4️⃣ Подписывает токен секретным ключом
+5️⃣ Возвращает строку
+
+При проверке:
+
+Он:
+1️⃣ Читает токен
+2️⃣ Проверяет подпись
+3️⃣ Проверяет срок жизни
+4️⃣ Извлекает email
+
+🛡 JwtAuthenticationFilter
+Что делает:
+
+Он:
+1️⃣ Перехватывает каждый HTTP запрос
+2️⃣ Берёт Authorization header
+3️⃣ Проверяет Bearer токен
+4️⃣ Извлекает email
+5️⃣ Загружает пользователя
+6️⃣ Проверяет токен
+7️⃣ Кладёт Authentication в SecurityContext
+
+🧠 SecurityContextHolder
+Что делает:
+
+Он:
+1️⃣ Хранит текущего пользователя
+2️⃣ Доступен из любого места приложения
+
+Например:
+
+SecurityContextHolder.getContext().getAuthentication()
+
+🔁 ПОЛНЫЙ ПОТОК ЛОГИНА
+POST /auth/login
+AuthController
+↓
+AuthenticationManager
+↓
+DaoAuthenticationProvider
+↓
+CustomUserDetailsService
+↓
+Database
+↓
+PasswordEncoder
+↓
+Authentication
+↓
+JwtService
+↓
+Response(token)
+
+🔁 ПОТОК ЗАПРОСОВ С JWT
+GET /orders
+JwtAuthenticationFilter
+↓
+JwtService
+↓
+CustomUserDetailsService
+↓
+SecurityContextHolder
+↓
+Controller
+
+⚠ Почему два раза UserDetailsService?
+
+Потому что:
+Момент	         Для чего
+login	         проверить пароль
+JWT request	     восстановить пользователя
